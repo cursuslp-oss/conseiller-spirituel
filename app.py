@@ -4,7 +4,7 @@ import anthropic
 # --- Configuration de la page ---
 st.set_page_config(
     page_title="Miroir Intérieur",
-    page_icon="🪞",
+    page_icon=None,
     layout="centered"
 )
 
