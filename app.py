@@ -8,12 +8,25 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- Import Google Font ---
+st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+""", unsafe_allow_html=True)
+
 # --- Style personnalisé ---
 st.markdown("""
 <style>
-    /* Fond général */
+    /* Fond général avec dégradé subtil */
     .stApp {
-        background-color: #0a0a0a;
+        background: linear-gradient(160deg, #0c0c14 0%, #111118 50%, #0e0e16 100%);
+    }
+
+    /* Typographie globale */
+    .stApp, .stChatMessage p, .stMarkdown p {
+        font-family: 'Inter', -apple-system, sans-serif !important;
+        font-weight: 300;
+        letter-spacing: 0.01em;
+        line-height: 1.7;
     }
 
     /* Cacher le menu hamburger et le footer */
@@ -24,42 +37,98 @@ st.markdown("""
     /* En-tête personnalisé */
     .header-container {
         text-align: center;
-        padding: 2rem 1rem 1rem 1rem;
-        border-bottom: 1px solid #1a1a2e;
-        margin-bottom: 1.5rem;
+        padding: 3rem 1rem 1.5rem 1rem;
+        margin-bottom: 1rem;
     }
     .header-title {
-        font-family: 'Georgia', serif;
-        font-size: 1.8rem;
-        color: #c9a96e;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.3rem;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2rem;
+        font-weight: 400;
+        color: #e8e4df;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.6rem;
+    }
+    .header-line {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #555, transparent);
+        margin: 0.8rem auto;
     }
     .header-sub {
-        font-size: 0.85rem;
-        color: #666;
-        font-style: italic;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 300;
+        color: #6b6b7b;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 
     /* Messages du chat */
     .stChatMessage {
         background-color: transparent !important;
         border: none !important;
+        padding: 0.8rem 0 !important;
+    }
+    
+    /* Style des messages assistant */
+    .stChatMessage [data-testid="chatAvatarIcon-assistant"] {
+        background-color: #1e1e2e !important;
+    }
+
+    /* Couleur du texte des messages */
+    .stChatMessage p {
+        color: #c8c8d0 !important;
+        font-size: 0.95rem !important;
     }
 
     /* Zone de saisie */
     .stChatInput > div {
-        border-color: #1a1a2e !important;
+        border-color: #1e1e2e !important;
+        background-color: #13131b !important;
+        border-radius: 12px !important;
+    }
+    .stChatInput textarea {
+        color: #d0d0d8 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 300 !important;
+    }
+    .stChatInput textarea::placeholder {
+        color: #4a4a5a !important;
+    }
+
+    /* Bouton Nouvelle conversation */
+    .stButton > button {
+        background-color: transparent !important;
+        color: #6b6b7b !important;
+        border: 1px solid #252535 !important;
+        border-radius: 8px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 400 !important;
+        font-size: 0.82rem !important;
+        letter-spacing: 0.05em !important;
+        padding: 0.4rem 1.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button:hover {
+        border-color: #404050 !important;
+        color: #9a9aaa !important;
+        background-color: #1a1a28 !important;
     }
 
     /* Disclaimer en bas */
     .disclaimer {
         text-align: center;
-        color: #444;
-        font-size: 0.7rem;
-        padding: 1rem;
-        border-top: 1px solid #1a1a2e;
-        margin-top: 2rem;
+        color: #3a3a4a;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 300;
+        padding: 2rem 1rem 1rem 1rem;
+        letter-spacing: 0.03em;
+    }
+
+    /* Spinner */
+    .stSpinner > div {
+        border-color: #2a2a3a !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -246,7 +315,8 @@ MESSAGE_ACCUEIL = "Bienvenue. Ici, pas de conseils, pas de solutions, pas de for
 st.markdown("""
 <div class="header-container">
     <div class="header-title">Compagnon de Réflexion</div>
-    <div class="header-sub">Un espace pour regarder en soi avec honnêteté</div>
+    <div class="header-line"></div>
+    <div class="header-sub">Un espace pour regarder en soi</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -308,7 +378,6 @@ if prompt := st.chat_input("Écris ici..."):
 # --- Disclaimer ---
 st.markdown("""
 <div class="disclaimer">
-    Cet espace est un compagnon de réflexion, pas un substitut à un accompagnement professionnel.<br>
-    En cas d'urgence, appelle le 3114 (24h/24).
+    Compagnon de réflexion, pas un substitut professionnel. Urgence : 3114 (24h/24).
 </div>
 """, unsafe_allow_html=True)
