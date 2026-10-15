@@ -4,7 +4,7 @@ import anthropic
 # --- Configuration de la page ---
 st.set_page_config(
     page_title="Miroir Intérieur",
-    page_icon=None,
+    page_icon="🪞",
     layout="centered"
 )
 
@@ -325,6 +325,28 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# --- Nombre de questions gratuites ---
+QUESTIONS_GRATUITES = 1
+
+# --- Liens de paiement Stripe ---
+LIENS_STRIPE = {
+    "Essentiel": {
+        "prix": "4,90",
+        "detail": "30 échanges / mois",
+        "url": "https://buy.stripe.com/dRm4gA1sP05Bh0F3SAbMQ0R"
+    },
+    "Liberté": {
+        "prix": "9,90",
+        "detail": "~100 échanges / mois",
+        "url": "https://buy.stripe.com/8x2cN63AXf0v1lH0GobMQ0S"
+    },
+    "Illimité": {
+        "prix": "19,90",
+        "detail": "Échanges illimités",
+        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T"
+    }
+}
+
 # --- Initialisation de la session ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -332,6 +354,8 @@ if "messages" not in st.session_state:
         "role": "assistant",
         "content": MESSAGE_ACCUEIL
     })
+if "nb_questions" not in st.session_state:
+    st.session_state.nb_questions = 0
 
 # --- Bouton nouvelle conversation ---
 col1, col2, col3 = st.columns([1, 1, 1])
@@ -348,37 +372,100 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- Saisie utilisateur ---
-if prompt := st.chat_input("Qu'est-ce qui t'amène ?"):
-    # Afficher le message utilisateur
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+# --- Saisie utilisateur ou Paywall ---
+if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
+    # Paywall : afficher les offres d'abonnement
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 1rem; margin-top: 1rem;">
+        <div style="width: 50px; height: 1px; background: linear-gradient(90deg, transparent, #e2c46d, transparent); margin: 0 auto 1.5rem auto;"></div>
+        <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; font-weight: 300; color: #e8e4e0; margin-bottom: 0.5rem;">
+            Ce premier échange t'a parlé ?
+        </p>
+        <p style="font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; color: #7a8090; margin-bottom: 2rem;">
+            Continue à explorer ton intérieur avec un accès complet.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Appeler l'API
-    with st.chat_message("assistant"):
-        with st.spinner(""):
-            try:
-                client = anthropic.Anthropic(api_key=CLE_API)
-                reponse = client.messages.create(
-                    model="claude-sonnet-4-6",
-                    max_tokens=1024,
-                    system=PROMPT_SYSTEME,
-                    messages=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages
-                    ]
-                )
-                texte = reponse.content[0].text
-                st.markdown(texte)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": texte
-                })
-            except anthropic.AuthenticationError:
-                st.error("Clé API invalide. Vérifie ta clé Anthropic.")
-            except Exception as e:
-                st.error(f"Erreur : {e}")
+    cols = st.columns(3)
+    for i, (nom, info) in enumerate(LIENS_STRIPE.items()):
+        with cols[i]:
+            st.markdown(f"""
+            <div style="
+                border: 1px solid #1b1e30;
+                border-radius: 16px;
+                padding: 1.5rem 1rem;
+                text-align: center;
+                background: rgba(15, 20, 34, 0.6);
+                transition: border-color 0.3s ease;
+            ">
+                <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; font-weight: 400; color: #e2c46d; margin-bottom: 0.3rem;">{nom}</p>
+                <p style="font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 300; color: #e8e4e0; margin-bottom: 0.2rem;">{info['prix']}€<span style="font-size: 0.75rem; color: #7a8090;">/mois</span></p>
+                <p style="font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 300; color: #7a8090; margin-bottom: 1rem;">{info['detail']}</p>
+                <a href="{info['url']}" target="_blank" style="
+                    display: inline-block;
+                    padding: 0.5rem 1.5rem;
+                    border: 1px solid #c9a84c;
+                    border-radius: 20px;
+                    color: #c9a84c;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 0.75rem;
+                    font-weight: 300;
+                    letter-spacing: 0.06em;
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                ">Commencer</a>
+            </div>
+            """, unsafe_allow_html=True)
+
+else:
+    # Question gratuite disponible
+    if st.session_state.nb_questions == 0:
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 300; color: #c9a84c; letter-spacing: 0.08em;">
+                ✦ 1 question offerte pour découvrir Miroir Intérieur
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if prompt := st.chat_input("Qu'est-ce qui t'amène ?"):
+        # Afficher le message utilisateur
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Incrémenter le compteur
+        st.session_state.nb_questions += 1
+
+        # Appeler l'API
+        with st.chat_message("assistant"):
+            with st.spinner(""):
+                try:
+                    client = anthropic.Anthropic(api_key=CLE_API)
+                    reponse = client.messages.create(
+                        model="claude-sonnet-4-6",
+                        max_tokens=1024,
+                        system=PROMPT_SYSTEME,
+                        messages=[
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages
+                        ]
+                    )
+                    texte = reponse.content[0].text
+                    st.markdown(texte)
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": texte
+                    })
+                except anthropic.AuthenticationError:
+                    st.error("Clé API invalide. Vérifie ta clé Anthropic.")
+                except Exception as e:
+                    st.error(f"Erreur : {e}")
+
+        # Si c'était la dernière question gratuite, rerun pour afficher le paywall
+        if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
+            st.rerun()
 
 # --- Disclaimer ---
 st.markdown("""
