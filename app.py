@@ -3,22 +3,22 @@ import anthropic
 
 # --- Configuration de la page ---
 st.set_page_config(
-    page_title="Compagnon de Réflexion",
-    page_icon="🪞",
+    page_title="Miroir Intérieur",
+    page_icon=None,
     layout="centered"
 )
 
-# --- Import Google Font ---
+# --- Import Google Fonts ---
 st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
 # --- Style personnalisé ---
 st.markdown("""
 <style>
-    /* Fond général avec dégradé subtil */
+    /* Fond bleu nuit profond */
     .stApp {
-        background: linear-gradient(160deg, #0c0c14 0%, #111118 50%, #0e0e16 100%);
+        background: linear-gradient(160deg, #060a14 0%, #0a0e1a 50%, #060a14 100%);
     }
 
     /* Typographie globale */
@@ -26,7 +26,7 @@ st.markdown("""
         font-family: 'Inter', -apple-system, sans-serif !important;
         font-weight: 300;
         letter-spacing: 0.01em;
-        line-height: 1.7;
+        line-height: 1.8;
     }
 
     /* Cacher le menu hamburger et le footer */
@@ -41,25 +41,25 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .header-title {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 2rem;
-        font-weight: 400;
-        color: #e8e4df;
-        letter-spacing: 0.02em;
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 2.6rem;
+        font-weight: 300;
+        color: #e8e4e0;
+        letter-spacing: 0.03em;
         margin-bottom: 0.6rem;
     }
     .header-line {
-        width: 40px;
+        width: 50px;
         height: 1px;
-        background: linear-gradient(90deg, transparent, #555, transparent);
+        background: linear-gradient(90deg, transparent, #e2c46d, transparent);
         margin: 0.8rem auto;
     }
     .header-sub {
         font-family: 'Inter', sans-serif;
-        font-size: 0.82rem;
+        font-size: 0.72rem;
         font-weight: 300;
-        color: #6b6b7b;
-        letter-spacing: 0.08em;
+        color: #464a5a;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
     }
 
@@ -69,66 +69,71 @@ st.markdown("""
         border: none !important;
         padding: 0.8rem 0 !important;
     }
-    
-    /* Style des messages assistant */
-    .stChatMessage [data-testid="chatAvatarIcon-assistant"] {
-        background-color: #1e1e2e !important;
+
+    /* Cacher les avatars */
+    .stChatMessage [data-testid="chatAvatarIcon-assistant"],
+    .stChatMessage [data-testid="chatAvatarIcon-user"],
+    .stChatMessage .stAvatar {
+        display: none !important;
     }
 
     /* Couleur du texte des messages */
     .stChatMessage p {
-        color: #c8c8d0 !important;
-        font-size: 0.95rem !important;
+        color: #c0c8d8 !important;
+        font-size: 0.92rem !important;
+        font-weight: 300 !important;
+        line-height: 1.8 !important;
     }
 
     /* Zone de saisie */
     .stChatInput > div {
-        border-color: #1e1e2e !important;
-        background-color: #13131b !important;
-        border-radius: 12px !important;
+        border-color: #1b1e30 !important;
+        background-color: #0f1422 !important;
+        border-radius: 24px !important;
     }
     .stChatInput textarea {
-        color: #d0d0d8 !important;
+        color: #d0d4e0 !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
     }
     .stChatInput textarea::placeholder {
-        color: #4a4a5a !important;
+        color: #464a5a !important;
+        font-style: italic !important;
     }
 
     /* Bouton Nouvelle conversation */
     .stButton > button {
         background-color: transparent !important;
-        color: #6b6b7b !important;
-        border: 1px solid #252535 !important;
-        border-radius: 8px !important;
+        color: #7a8090 !important;
+        border: 1px solid #1b1e30 !important;
+        border-radius: 20px !important;
         font-family: 'Inter', sans-serif !important;
-        font-weight: 400 !important;
-        font-size: 0.82rem !important;
-        letter-spacing: 0.05em !important;
-        padding: 0.4rem 1.5rem !important;
+        font-weight: 300 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.06em !important;
+        padding: 0.45rem 1.6rem !important;
         transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
-        border-color: #404050 !important;
-        color: #9a9aaa !important;
-        background-color: #1a1a28 !important;
+        border-color: #a08230 !important;
+        color: #c9a84c !important;
+        background-color: transparent !important;
     }
 
     /* Disclaimer en bas */
     .disclaimer {
         text-align: center;
-        color: #3a3a4a;
+        color: #464a5a;
         font-family: 'Inter', sans-serif;
-        font-size: 0.68rem;
-        font-weight: 300;
+        font-size: 0.62rem;
+        font-weight: 200;
         padding: 2rem 1rem 1rem 1rem;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.04em;
     }
 
     /* Spinner */
     .stSpinner > div {
-        border-color: #2a2a3a !important;
+        border-color: #1b1e30 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -314,9 +319,9 @@ MESSAGE_ACCUEIL = "Bienvenue. Ici, pas de conseils, pas de solutions, pas de for
 # --- En-tête ---
 st.markdown("""
 <div class="header-container">
-    <div class="header-title">Compagnon de Réflexion</div>
+    <div class="header-title">Miroir Intérieur</div>
     <div class="header-line"></div>
-    <div class="header-sub">Un espace pour regarder en soi</div>
+    <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -344,7 +349,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # --- Saisie utilisateur ---
-if prompt := st.chat_input("Écris ici..."):
+if prompt := st.chat_input("Qu'est-ce qui t'amène ?"):
     # Afficher le message utilisateur
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -378,6 +383,6 @@ if prompt := st.chat_input("Écris ici..."):
 # --- Disclaimer ---
 st.markdown("""
 <div class="disclaimer">
-    Compagnon de réflexion, pas un substitut professionnel. Urgence : 3114 (24h/24).
+    Espace de réflexion, pas un substitut professionnel. Urgence : 3114 (24h/24).
 </div>
 """, unsafe_allow_html=True)
