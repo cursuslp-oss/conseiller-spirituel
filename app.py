@@ -21,12 +21,19 @@ st.markdown("""
         background: linear-gradient(160deg, #060a14 0%, #0a0e1a 50%, #060a14 100%);
     }
 
-    /* Typographie globale */
+    /* Typographie globale + FORCER texte blanc partout */
     .stApp, .stChatMessage p, .stMarkdown p {
         font-family: 'Inter', -apple-system, sans-serif !important;
         font-weight: 300;
         letter-spacing: 0.01em;
         line-height: 1.8;
+        color: #ffffff !important;
+    }
+    /* Forcer blanc sur tous les éléments texte possibles */
+    .stApp p, .stApp span, .stApp div, .stApp li,
+    .stChatMessage, .stChatMessage p, .stChatMessage span, .stChatMessage div,
+    .stMarkdown, .stMarkdown p, .stMarkdown span {
+        color: #ffffff !important;
     }
 
     /* Cacher le menu hamburger et le footer */
@@ -58,7 +65,7 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
         font-size: 0.78rem;
         font-weight: 300;
-        color: #9a9eb0;
+        color: #c0c4d0 !important;
         letter-spacing: 0.15em;
         text-transform: uppercase;
     }
@@ -179,9 +186,9 @@ st.markdown("""
     }
 
     /* Disclaimer en bas */
-    .disclaimer {
+    .disclaimer, .disclaimer * {
         text-align: center;
-        color: #464a5a;
+        color: #464a5a !important;
         font-family: 'Inter', sans-serif;
         font-size: 0.62rem;
         font-weight: 200;
@@ -410,22 +417,29 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     </div>
     """, unsafe_allow_html=True)
 
-    # Construire toutes les cartes en un seul bloc HTML (évite les bugs Streamlit dans les colonnes)
+    # Construire les cartes dans un composant HTML natif (iframe, pas de sanitisation Streamlit)
     cartes_html = ""
     for nom, info in LIENS_STRIPE.items():
         est_populaire = info.get("populaire", False)
-        classe = "pricing-card populaire" if est_populaire else "pricing-card"
-        badge = '<div class="pricing-badge">&#10022; Le plus choisi</div>' if est_populaire else ""
+        border_style = "border-color: #c9a84c;" if est_populaire else ""
+        badge = '<div style="font-family: Inter, sans-serif; font-size: 0.58rem; color: #e2c46d; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">&#10022; Le plus choisi</div>' if est_populaire else ""
         cartes_html += f"""
-        <div class="{classe}">
+        <div style="border: 1px solid #1b1e30; border-radius: 16px; padding: 1.5rem 1rem; text-align: center; background: rgba(15, 20, 34, 0.6); {border_style}">
             {badge}
-            <div class="pricing-name">{nom}</div>
-            <div class="pricing-price">{info['prix']}&#8364;<span>/mois</span></div>
-            <div class="pricing-detail">{info['detail']}</div>
-            <a href="{info['url']}" target="_blank" rel="noopener noreferrer" class="pricing-cta">Commencer</a>
+            <div style="font-family: Cormorant Garamond, Georgia, serif; font-size: 1.2rem; color: #e2c46d; margin-bottom: 0.3rem;">{nom}</div>
+            <div style="font-family: Inter, sans-serif; font-size: 1.6rem; font-weight: 300; color: #e8e4e0; margin-bottom: 0.2rem;">{info['prix']}&#8364;<span style="font-size: 0.75rem; color: #7a8090;">/mois</span></div>
+            <div style="font-family: Inter, sans-serif; font-size: 0.7rem; color: #7a8090; margin-bottom: 1rem;">{info['detail']}</div>
+            <a href="{info['url']}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 0.6rem 2rem; background: linear-gradient(135deg, #c9a84c, #a08230); border-radius: 20px; color: #0a0e1a; font-family: Inter, sans-serif; font-size: 0.8rem; font-weight: 500; text-decoration: none; box-shadow: 0 2px 12px rgba(201, 168, 76, 0.3);">Commencer</a>
         </div>"""
 
-    st.markdown(f'<div class="pricing-grid">{cartes_html}</div>', unsafe_allow_html=True)
+    html_complet = f"""
+    <html><body style="margin:0; padding:0; background:transparent; font-family: Inter, sans-serif;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 0.5rem;">
+        {cartes_html}
+    </div>
+    </body></html>
+    """
+    st.components.v1.html(html_complet, height=420)
 
 else:
     # Question gratuite disponible
