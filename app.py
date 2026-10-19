@@ -63,11 +63,25 @@ st.markdown("""
         text-transform: uppercase;
     }
 
-    /* Messages du chat */
+    /* Messages du chat - base */
     .stChatMessage {
         background-color: transparent !important;
         border: none !important;
-        padding: 0.8rem 0 !important;
+        padding: 1rem 0.8rem !important;
+        margin-bottom: 0.4rem !important;
+        border-radius: 12px !important;
+    }
+
+    /* Messages de l'utilisateur */
+    .stChatMessage[data-testid="stChatMessage-user"] {
+        background-color: rgba(201, 168, 76, 0.08) !important;
+        border-left: 2px solid rgba(201, 168, 76, 0.3) !important;
+    }
+
+    /* Réponses de Miroir Intérieur */
+    .stChatMessage[data-testid="stChatMessage-assistant"] {
+        background-color: rgba(192, 200, 216, 0.04) !important;
+        border-left: 2px solid rgba(192, 200, 216, 0.15) !important;
     }
 
     /* Cacher les avatars */
@@ -82,8 +96,17 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Couleur du texte des messages */
-    .stChatMessage p {
+    /* Texte des messages utilisateur */
+    .stChatMessage[data-testid="stChatMessage-user"] p {
+        color: #d4c090 !important;
+        font-size: 0.90rem !important;
+        font-weight: 300 !important;
+        line-height: 1.8 !important;
+        font-style: italic !important;
+    }
+
+    /* Texte des réponses */
+    .stChatMessage[data-testid="stChatMessage-assistant"] p {
         color: #c0c8d8 !important;
         font-size: 0.92rem !important;
         font-weight: 300 !important;
@@ -422,7 +445,7 @@ LIENS_STRIPE = {
     "Illimité": {
         "prix": "39,90",
         "detail": "Sans aucune limite",
-        "url": "REMPLACER_PAR_LIEN_STRIPE_ILLIMITE"
+        "url": "https://buy.stripe.com/00waEY2wTf0v25L0GobMQ0U"
     }
 }
 
