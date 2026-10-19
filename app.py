@@ -57,7 +57,7 @@ st.markdown("""
     }
     .header-sub {
         font-family: 'Inter', sans-serif;
-        font-size: 0.78rem;
+        font-size: 0.95rem:
         font-weight: 300;
         color: #c0c4d0 !important;
         letter-spacing: 0.15em;
