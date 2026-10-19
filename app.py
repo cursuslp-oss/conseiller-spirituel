@@ -21,19 +21,13 @@ st.markdown("""
         background: linear-gradient(160deg, #060a14 0%, #0a0e1a 50%, #060a14 100%);
     }
 
-    /* Typographie globale + FORCER texte blanc partout */
+    /* Typographie globale */
     .stApp, .stChatMessage p, .stMarkdown p {
         font-family: 'Inter', -apple-system, sans-serif !important;
         font-weight: 300;
         letter-spacing: 0.01em;
         line-height: 1.8;
-        color: #ffffff !important;
-    }
-    /* Forcer blanc sur tous les éléments texte possibles */
-    .stApp p, .stApp span, .stApp div, .stApp li,
-    .stChatMessage, .stChatMessage p, .stChatMessage span, .stChatMessage div,
-    .stMarkdown, .stMarkdown p, .stMarkdown span {
-        color: #ffffff !important;
+        color: #d0d4e8 !important;
     }
 
     /* Cacher le menu hamburger et le footer */
