@@ -4,7 +4,7 @@ import anthropic
 # --- Configuration de la page ---
 st.set_page_config(
     page_title="Miroir Intérieur",
-    page_icon=None,
+    page_icon="🪞",
     layout="centered"
 )
 
@@ -73,7 +73,12 @@ st.markdown("""
     /* Cacher les avatars */
     .stChatMessage [data-testid="chatAvatarIcon-assistant"],
     .stChatMessage [data-testid="chatAvatarIcon-user"],
-    .stChatMessage .stAvatar {
+    .stChatMessage .stAvatar,
+    .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
+    .stChatMessage [data-testid="stChatMessageAvatarUser"],
+    .stChatMessage img[alt="assistant avatar"],
+    .stChatMessage img[alt="user avatar"],
+    .stChatMessage svg {
         display: none !important;
     }
 
@@ -391,7 +396,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Nombre de questions gratuites ---
-QUESTIONS_GRATUITES = 1
+QUESTIONS_GRATUITES = 2
 
 # --- Liens de paiement Stripe ---
 LIENS_STRIPE = {
