@@ -397,25 +397,58 @@ st.markdown("""
 
 # --- Nombre de questions gratuites ---
 QUESTIONS_GRATUITES = 2
+SEUIL_RESUME = 12       # Nombre de messages avant déclenchement du résumé glissant
+NB_MESSAGES_RECENTS = 4  # Nombre de messages récents gardés après résumé
+LIMITE_SESSION = 50      # Maximum de messages par session (sécurité anti-abus)
 
 # --- Liens de paiement Stripe ---
 LIENS_STRIPE = {
     "Essentiel": {
         "prix": "4,90",
-        "detail": "30 échanges / mois",
+        "detail": "5 échanges / jour",
         "url": "https://buy.stripe.com/dRm4gA1sP05Bh0F3SAbMQ0R"
     },
     "Liberté": {
         "prix": "9,90",
-        "detail": "~100 échanges / mois",
+        "detail": "15 échanges / jour",
         "url": "https://buy.stripe.com/8x2cN63AXf0v1lH0GobMQ0S"
     },
-    "Illimité": {
+    "Premium": {
         "prix": "19,90",
-        "detail": "Échanges illimités",
-        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T"
+        "detail": "25 échanges / jour",
+        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T",
+        "populaire": True
+    },
+    "Illimité": {
+        "prix": "39,90",
+        "detail": "Sans aucune limite",
+        "url": "REMPLACER_PAR_LIEN_STRIPE_ILLIMITE"
     }
 }
+
+
+# --- Fonction de résumé glissant ---
+def generer_resume(messages, cle_api):
+    """Condense l'historique en notes de séance pour limiter les tokens."""
+    client = anthropic.Anthropic(api_key=cle_api)
+    conversation = "\n".join([
+        f"{'Personne' if m['role'] == 'user' else 'Miroir'}: {m['content']}"
+        for m in messages
+    ])
+    reponse = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=500,
+        system=(
+            "Résume cette conversation de réflexion intérieure en notes concises. "
+            "Capture : les thèmes explorés, les émotions exprimées, les prises de "
+            "conscience, les métaphores utilisées, les questions restées ouvertes, "
+            "et tout détail important sur la situation de la personne. "
+            "Maximum 200 mots. Sois factuel et précis."
+        ),
+        messages=[{"role": "user", "content": conversation}]
+    )
+    return reponse.content[0].text
+
 
 # --- Initialisation de la session ---
 if "messages" not in st.session_state:
@@ -426,6 +459,8 @@ if "messages" not in st.session_state:
     })
 if "nb_questions" not in st.session_state:
     st.session_state.nb_questions = 0
+if "resume_seance" not in st.session_state:
+    st.session_state.resume_seance = ""
 
 # --- Bouton nouvelle conversation ---
 col1, col2, col3 = st.columns([1, 1, 1])
@@ -435,6 +470,7 @@ with col2:
             "role": "assistant",
             "content": MESSAGE_ACCUEIL
         }]
+        st.session_state.resume_seance = ""
         st.rerun()
 
 # --- Affichage des messages ---
@@ -457,44 +493,58 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     </div>
     """, unsafe_allow_html=True)
 
-    cols = st.columns(3)
-    for i, (nom, info) in enumerate(LIENS_STRIPE.items()):
-        with cols[i]:
-            st.markdown(f"""
-            <div style="
-                border: 1px solid #1b1e30;
-                border-radius: 16px;
-                padding: 1.5rem 1rem;
-                text-align: center;
-                background: rgba(15, 20, 34, 0.6);
-                transition: border-color 0.3s ease;
-            ">
-                <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; font-weight: 400; color: #e2c46d; margin-bottom: 0.3rem;">{nom}</p>
-                <p style="font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 300; color: #e8e4e0; margin-bottom: 0.2rem;">{info['prix']}€<span style="font-size: 0.75rem; color: #7a8090;">/mois</span></p>
-                <p style="font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 300; color: #7a8090; margin-bottom: 1rem;">{info['detail']}</p>
-                <a href="{info['url']}" target="_blank" style="
-                    display: inline-block;
-                    padding: 0.5rem 1.5rem;
-                    border: 1px solid #c9a84c;
-                    border-radius: 20px;
-                    color: #c9a84c;
-                    font-family: 'Inter', sans-serif;
-                    font-size: 0.75rem;
-                    font-weight: 300;
-                    letter-spacing: 0.06em;
-                    text-decoration: none;
-                    transition: all 0.3s ease;
-                ">Commencer</a>
-            </div>
-            """, unsafe_allow_html=True)
+    forfaits = list(LIENS_STRIPE.items())
+    for row in range(2):
+        cols = st.columns(2)
+        for col_idx in range(2):
+            idx = row * 2 + col_idx
+            nom, info = forfaits[idx]
+            est_populaire = info.get("populaire", False)
+            bordure = "#c9a84c" if est_populaire else "#1b1e30"
+            badge = '<p style="font-family: \'Inter\', sans-serif; font-size: 0.58rem; font-weight: 400; color: #e2c46d; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;">&#10022; Le plus choisi</p>' if est_populaire else ""
+            with cols[col_idx]:
+                st.markdown(f"""
+                <div style="
+                    border: 1px solid {bordure};
+                    border-radius: 16px;
+                    padding: 1.5rem 1rem;
+                    text-align: center;
+                    background: rgba(15, 20, 34, 0.6);
+                    transition: border-color 0.3s ease;
+                    margin-bottom: 0.8rem;
+                ">
+                    {badge}
+                    <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; font-weight: 400; color: #e2c46d; margin-bottom: 0.3rem;">{nom}</p>
+                    <p style="font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 300; color: #e8e4e0; margin-bottom: 0.2rem;">{info['prix']}€<span style="font-size: 0.75rem; color: #7a8090;">/mois</span></p>
+                    <p style="font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 300; color: #7a8090; margin-bottom: 1rem;">{info['detail']}</p>
+                    <a href="{info['url']}" target="_blank" style="
+                        display: inline-block;
+                        padding: 0.5rem 1.5rem;
+                        border: 1px solid #c9a84c;
+                        border-radius: 20px;
+                        color: #c9a84c;
+                        font-family: 'Inter', sans-serif;
+                        font-size: 0.75rem;
+                        font-weight: 300;
+                        letter-spacing: 0.06em;
+                        text-decoration: none;
+                        transition: all 0.3s ease;
+                    ">Commencer</a>
+                </div>
+                """, unsafe_allow_html=True)
 
 else:
     # Question gratuite disponible
-    if st.session_state.nb_questions == 0:
+    restantes = QUESTIONS_GRATUITES - st.session_state.nb_questions
+    if restantes > 0:
+        if restantes == QUESTIONS_GRATUITES:
+            texte_offre = f"&#10022; {restantes} questions offertes pour découvrir Miroir Intérieur"
+        else:
+            texte_offre = f"&#10022; Dernière question gratuite"
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 0.5rem;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 300; color: #c9a84c; letter-spacing: 0.08em;">
-                ✦ 1 question offerte pour découvrir Miroir Intérieur
+                {texte_offre}
             </span>
         </div>
         """, unsafe_allow_html=True)
@@ -508,15 +558,27 @@ else:
         # Incrémenter le compteur
         st.session_state.nb_questions += 1
 
-        # Appeler l'API
+        # Appeler l'API avec résumé glissant
         with st.chat_message("assistant"):
             with st.spinner(""):
                 try:
                     client = anthropic.Anthropic(api_key=CLE_API)
+
+                    # Construire le prompt système avec notes de séance
+                    system_prompt = PROMPT_SYSTEME
+                    if st.session_state.resume_seance:
+                        system_prompt += (
+                            "\n\n## NOTES DE SÉANCE\n\n"
+                            "Voici un résumé de ce qui a été exploré précédemment "
+                            "dans cette conversation. Utilise ces notes pour assurer "
+                            "la continuité sans te répéter :\n\n"
+                            + st.session_state.resume_seance
+                        )
+
                     reponse = client.messages.create(
                         model="claude-sonnet-4-6",
                         max_tokens=1024,
-                        system=PROMPT_SYSTEME,
+                        system=system_prompt,
                         messages=[
                             {"role": m["role"], "content": m["content"]}
                             for m in st.session_state.messages
@@ -528,6 +590,23 @@ else:
                         "role": "assistant",
                         "content": texte
                     })
+
+                    # Résumé glissant : condenser si trop de messages
+                    if len(st.session_state.messages) >= SEUIL_RESUME:
+                        try:
+                            messages_a_resumer = st.session_state.messages[:-NB_MESSAGES_RECENTS]
+                            if st.session_state.resume_seance:
+                                messages_a_resumer.insert(0, {
+                                    "role": "assistant",
+                                    "content": "Résumé précédent : " + st.session_state.resume_seance
+                                })
+                            st.session_state.resume_seance = generer_resume(
+                                messages_a_resumer, CLE_API
+                            )
+                            st.session_state.messages = st.session_state.messages[-NB_MESSAGES_RECENTS:]
+                        except Exception:
+                            pass  # En cas d'erreur, garder l'historique complet
+
                 except anthropic.AuthenticationError:
                     st.error("Clé API invalide. Vérifie ta clé Anthropic.")
                 except Exception as e:
