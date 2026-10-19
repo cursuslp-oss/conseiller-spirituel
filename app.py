@@ -68,20 +68,50 @@ st.markdown("""
         background-color: transparent !important;
         border: none !important;
         padding: 1rem 0.8rem !important;
-        margin-bottom: 0.4rem !important;
+        padding-top: 2rem !important;
+        margin-bottom: 0.6rem !important;
         border-radius: 12px !important;
+        position: relative !important;
     }
 
     /* Messages de l'utilisateur */
     .stChatMessage[data-testid="stChatMessage-user"] {
-        background-color: rgba(201, 168, 76, 0.08) !important;
-        border-left: 2px solid rgba(201, 168, 76, 0.3) !important;
+        background-color: rgba(201, 168, 76, 0.10) !important;
+        border-left: 2px solid rgba(201, 168, 76, 0.4) !important;
+    }
+
+    /* Label "Ma question" */
+    .stChatMessage[data-testid="stChatMessage-user"]::before {
+        content: "Ma question";
+        position: absolute;
+        top: 0.5rem;
+        left: 1rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.62rem;
+        font-weight: 400;
+        color: #c9a84c;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
     }
 
     /* Réponses de Miroir Intérieur */
     .stChatMessage[data-testid="stChatMessage-assistant"] {
-        background-color: rgba(192, 200, 216, 0.04) !important;
-        border-left: 2px solid rgba(192, 200, 216, 0.15) !important;
+        background-color: rgba(192, 200, 216, 0.06) !important;
+        border-left: 2px solid rgba(192, 200, 216, 0.2) !important;
+    }
+
+    /* Label "Le miroir" */
+    .stChatMessage[data-testid="stChatMessage-assistant"]::before {
+        content: "Le miroir";
+        position: absolute;
+        top: 0.5rem;
+        left: 1rem;
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 0.72rem;
+        font-weight: 400;
+        color: #9a9eb0;
+        letter-spacing: 0.08em;
+        font-style: italic;
     }
 
     /* Cacher les avatars */
@@ -96,18 +126,18 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Texte des messages utilisateur */
+    /* Texte des messages utilisateur - BLANC */
     .stChatMessage[data-testid="stChatMessage-user"] p {
-        color: #e8d5a0 !important;
+        color: #ffffff !important;
         font-size: 0.92rem !important;
         font-weight: 400 !important;
         line-height: 1.8 !important;
         font-style: italic !important;
     }
 
-    /* Texte des réponses */
+    /* Texte des réponses - BLANC */
     .stChatMessage[data-testid="stChatMessage-assistant"] p {
-        color: #dce0ec !important;
+        color: #f0f0f5 !important;
         font-size: 0.93rem !important;
         font-weight: 400 !important;
         line-height: 1.8 !important;
@@ -162,6 +192,20 @@ st.markdown("""
     /* Spinner */
     .stSpinner > div {
         border-color: #1b1e30 !important;
+    }
+
+    /* Grille des cartes */
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 0 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 640px) {
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Cartes de prix */
@@ -366,25 +410,22 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     </div>
     """, unsafe_allow_html=True)
 
-    forfaits = list(LIENS_STRIPE.items())
-    for row in range(2):
-        cols = st.columns(2)
-        for col_idx in range(2):
-            idx = row * 2 + col_idx
-            nom, info = forfaits[idx]
-            est_populaire = info.get("populaire", False)
-            classe_card = "pricing-card populaire" if est_populaire else "pricing-card"
-            badge = '<div class="pricing-badge">&#10022; Le plus choisi</div>' if est_populaire else ""
-            with cols[col_idx]:
-                st.markdown(f"""
-                <div class="{classe_card}">
-                    {badge}
-                    <div class="pricing-name">{nom}</div>
-                    <div class="pricing-price">{info['prix']}€<span>/mois</span></div>
-                    <div class="pricing-detail">{info['detail']}</div>
-                    <a href="{info['url']}" target="_blank" rel="noopener noreferrer" class="pricing-cta">Commencer</a>
-                </div>
-                """, unsafe_allow_html=True)
+    # Construire toutes les cartes en un seul bloc HTML (évite les bugs Streamlit dans les colonnes)
+    cartes_html = ""
+    for nom, info in LIENS_STRIPE.items():
+        est_populaire = info.get("populaire", False)
+        classe = "pricing-card populaire" if est_populaire else "pricing-card"
+        badge = '<div class="pricing-badge">&#10022; Le plus choisi</div>' if est_populaire else ""
+        cartes_html += f"""
+        <div class="{classe}">
+            {badge}
+            <div class="pricing-name">{nom}</div>
+            <div class="pricing-price">{info['prix']}&#8364;<span>/mois</span></div>
+            <div class="pricing-detail">{info['detail']}</div>
+            <a href="{info['url']}" target="_blank" rel="noopener noreferrer" class="pricing-cta">Commencer</a>
+        </div>"""
+
+    st.markdown(f'<div class="pricing-grid">{cartes_html}</div>', unsafe_allow_html=True)
 
 else:
     # Question gratuite disponible
