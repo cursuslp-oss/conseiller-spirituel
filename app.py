@@ -57,7 +57,7 @@ st.markdown("""
     }
     .header-sub {
         font-family: 'Inter', sans-serif;
-        font-size: 0.95rem:
+        font-size: 0.78rem;
         font-weight: 300;
         color: #c0c4d0 !important;
         letter-spacing: 0.15em;
@@ -115,30 +115,65 @@ st.markdown("""
         font-style: italic;
     }
 
-    /* Cacher les avatars */
-    .stChatMessage [data-testid="chatAvatarIcon-assistant"],
-    .stChatMessage [data-testid="chatAvatarIcon-user"],
+    /* Remplacer les avatars par des symboles */
     .stChatMessage .stAvatar,
     .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
     .stChatMessage [data-testid="stChatMessageAvatarUser"],
+    .stChatMessage [data-testid="chatAvatarIcon-assistant"],
+    .stChatMessage [data-testid="chatAvatarIcon-user"],
     .stChatMessage img[alt="assistant avatar"],
-    .stChatMessage img[alt="user avatar"],
-    .stChatMessage svg {
+    .stChatMessage img[alt="user avatar"] {
+        display: none !important;
+    }
+    /* Symbole doré ✦ pour le miroir */
+    .stChatMessage[data-testid="stChatMessage-assistant"] .stAvatar {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: transparent !important;
+        border: none !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 1.1rem;
+        color: #c9a84c;
+    }
+    .stChatMessage[data-testid="stChatMessage-assistant"] .stAvatar::after {
+        content: "✦";
+        color: #c9a84c;
+    }
+    /* Symbole gris ○ pour l'utilisateur */
+    .stChatMessage[data-testid="stChatMessage-user"] .stAvatar {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: transparent !important;
+        border: none !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.9rem;
+        color: #7a8090;
+    }
+    .stChatMessage[data-testid="stChatMessage-user"] .stAvatar::after {
+        content: "○";
+        color: #7a8090;
+    }
+    /* Cacher les SVG dans les avatars */
+    .stChatMessage .stAvatar svg {
         display: none !important;
     }
 
-    /* Texte des messages utilisateur - BLANC */
+    /* Texte des questions utilisateur - doré pâle, italique */
     .stChatMessage[data-testid="stChatMessage-user"] p {
-        color: #ffffff !important;
+        color: #e8d5a0 !important;
         font-size: 0.92rem !important;
         font-weight: 400 !important;
         line-height: 1.8 !important;
         font-style: italic !important;
     }
 
-    /* Texte des réponses - BLANC */
+    /* Texte des réponses du miroir - gris bleuté clair */
     .stChatMessage[data-testid="stChatMessage-assistant"] p {
-        color: #f0f0f5 !important;
+        color: #d0d4e8 !important;
         font-size: 0.93rem !important;
         font-weight: 400 !important;
         line-height: 1.8 !important;
@@ -318,33 +353,28 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Nombre de questions gratuites ---
-QUESTIONS_GRATUITES = 5
+QUESTIONS_GRATUITES = 2
 SEUIL_RESUME = 12       # Nombre de messages avant déclenchement du résumé glissant
 NB_MESSAGES_RECENTS = 4  # Nombre de messages récents gardés après résumé
 LIMITE_SESSION = 50      # Maximum de messages par session (sécurité anti-abus)
 
 # --- Liens de paiement Stripe ---
 LIENS_STRIPE = {
-    "Essentiel": {
+    "Découverte": {
         "prix": "4,90",
         "detail": "5 échanges / jour",
         "url": "https://buy.stripe.com/dRm4gA1sP05Bh0F3SAbMQ0R"
     },
-    "Liberté": {
+    "Essentiel": {
         "prix": "9,90",
-        "detail": "15 échanges / jour",
-        "url": "https://buy.stripe.com/8x2cN63AXf0v1lH0GobMQ0S"
-    },
-    "Premium": {
-        "prix": "19,90",
-        "detail": "25 échanges / jour",
-        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T",
+        "detail": "20 échanges / jour",
+        "url": "https://buy.stripe.com/8x2cN63AXf0v1lH0GobMQ0S",
         "populaire": True
     },
     "Illimité": {
-        "prix": "39,90",
+        "prix": "19,90",
         "detail": "Sans aucune limite",
-        "url": "https://buy.stripe.com/00waEY2wTf0v25L0GobMQ0U"
+        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T"
     }
 }
 
@@ -428,12 +458,12 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
 
     html_complet = f"""
     <html><body style="margin:0; padding:0; background:transparent; font-family: Inter, sans-serif;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 0.5rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; padding: 0.5rem;">
         {cartes_html}
     </div>
     </body></html>
     """
-    st.components.v1.html(html_complet, height=420)
+    st.components.v1.html(html_complet, height=320)
 
 else:
     # Question gratuite disponible
