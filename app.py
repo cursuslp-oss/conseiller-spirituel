@@ -348,7 +348,7 @@ st.markdown("""
 <div class="header-container">
     <div class="header-title">Miroir Intérieur</div>
     <div class="header-line"></div>
-    <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
+    <div class="header-sub">Un espace pour traverser ce que tu ne faisais que voir </div>
 </div>
 """, unsafe_allow_html=True)
 
