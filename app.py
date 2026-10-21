@@ -18,7 +18,7 @@ st.markdown("""
 <style>
     /* Fond bleu nuit profond */
     .stApp {
-        background: linear-gradient(160deg, #060a14 0%, #0a0e1a 50%, #060a14 100%);
+        background: linear-gradient(180deg, #020308 0%, #060a14 30%, #0a0e1a 70%, #0d1225 100%);
     }
 
     /* Typographie globale */
@@ -348,7 +348,7 @@ st.markdown("""
 <div class="header-container">
     <div class="header-title">Miroir Intérieur</div>
     <div class="header-line"></div>
-    <div class="header-sub">Un espace pour traverser ce que tu ne faisais que voir </div>
+    <div class="header-sub">Un espace où comprendre ne suffit plus </div>
 </div>
 """, unsafe_allow_html=True)
 
