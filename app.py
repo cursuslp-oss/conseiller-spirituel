@@ -16,9 +16,27 @@ st.markdown("""
 # --- Style personnalisé ---
 st.markdown("""
 <style>
-    /* Fond bleu nuit profond */
+    /* Fond bleu nuit profond avec texture grain */
     .stApp {
         background: linear-gradient(180deg, #020308 0%, #060a14 30%, #0a0e1a 70%, #0d1225 100%);
+    }
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(ellipse 60% 40% at 50% 18%, rgba(226,196,109,0.03) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .stApp::after {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: 256px 256px;
+        pointer-events: none;
+        z-index: 0;
     }
 
     /* Typographie globale */
@@ -195,23 +213,41 @@ st.markdown("""
         font-style: italic !important;
     }
 
-    /* Bouton Nouvelle conversation */
+    /* Bouton Nouvelle conversation — discret */
     .stButton > button {
         background-color: transparent !important;
-        color: #7a8090 !important;
-        border: 1px solid #1b1e30 !important;
+        color: #50546a !important;
+        border: 1px solid rgba(27, 30, 48, 0.5) !important;
         border-radius: 20px !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
-        font-size: 0.75rem !important;
+        font-size: 0.65rem !important;
         letter-spacing: 0.06em !important;
-        padding: 0.45rem 1.6rem !important;
+        padding: 0.35rem 1.2rem !important;
         transition: all 0.3s ease !important;
+        opacity: 0.7 !important;
     }
     .stButton > button:hover {
         border-color: #a08230 !important;
         color: #c9a84c !important;
         background-color: transparent !important;
+    }
+
+    /* Message d'accueil — distinct du chat */
+    .welcome-message {
+        text-align: center;
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 0.95rem;
+        font-weight: 300;
+        font-style: italic;
+        color: #9a9eb0;
+        line-height: 2;
+        letter-spacing: 0.02em;
+        padding: 1.5rem 2rem;
+        margin: 0 auto 1rem auto;
+        max-width: 520px;
+        border-top: 1px solid rgba(226,196,109,0.08);
+        border-bottom: 1px solid rgba(226,196,109,0.08);
     }
 
     /* Disclaimer en bas */
@@ -341,19 +377,19 @@ CLE_API = st.secrets["ANTHROPIC_API_KEY"]
 # --- Prompt système (stocké dans Streamlit Secrets pour protéger le contenu) ---
 PROMPT_SYSTEME = st.secrets["PROMPT_SYSTEME"]
 
-MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis et expérimente à l'extérieur te parle de ce que tu portes à l'intérieur. Si tu es prêt(e) à regarder, on y va. Qu'est-ce qui t'amène aujourd'hui ?"
+MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur. Si tu es prêt(e) à regarder, on y va."
 
 # --- En-tête ---
 st.markdown("""
 <div class="header-container">
     <div class="header-title">Miroir Intérieur</div>
     <div class="header-line"></div>
-    <div class="header-sub">Un espace où comprendre ne suffit plus </div>
+    <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- Nombre de questions gratuites ---
-QUESTIONS_GRATUITES = 5
+QUESTIONS_GRATUITES = 2
 SEUIL_RESUME = 12       # Nombre de messages avant déclenchement du résumé glissant
 NB_MESSAGES_RECENTS = 4  # Nombre de messages récents gardés après résumé
 LIMITE_SESSION = 50      # Maximum de messages par session (sécurité anti-abus)
@@ -426,9 +462,13 @@ with col2:
         st.rerun()
 
 # --- Affichage des messages ---
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for i, message in enumerate(st.session_state.messages):
+    # Premier message assistant = accueil → style distinct
+    if i == 0 and message["role"] == "assistant" and message["content"] == MESSAGE_ACCUEIL:
+        st.markdown(f'<div class="welcome-message">{message["content"]}</div>', unsafe_allow_html=True)
+    else:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
 # --- Saisie utilisateur ou Paywall ---
 if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
