@@ -390,7 +390,7 @@ CLE_API = st.secrets["ANTHROPIC_API_KEY"]
 # --- Prompt système (stocké dans Streamlit Secrets pour protéger le contenu) ---
 PROMPT_SYSTEME = st.secrets["PROMPT_SYSTEME"]
 
-MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur. Si tu es prêt(e) à regarder, on y va."
+MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- En-tête ---
 st.markdown("""
