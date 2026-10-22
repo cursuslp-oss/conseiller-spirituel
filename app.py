@@ -389,7 +389,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Nombre de questions gratuites ---
-QUESTIONS_GRATUITES = 2
+QUESTIONS_GRATUITES = 5
 SEUIL_RESUME = 12       # Nombre de messages avant déclenchement du résumé glissant
 NB_MESSAGES_RECENTS = 4  # Nombre de messages récents gardés après résumé
 LIMITE_SESSION = 50      # Maximum de messages par session (sécurité anti-abus)
