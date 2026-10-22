@@ -259,9 +259,19 @@ st.markdown("""
         letter-spacing: 0.04em;
     }
 
-    /* Bande basse (zone de saisie) — crème */
+    /* Bande basse (zone de saisie) — crème avec texture */
     .stBottom, .stBottom > div, [data-testid="stBottom"] {
-        background-color: #F5F0E8 !important;
+        background: #F5F0E8 repeating-conic-gradient(rgba(120,100,70,0.04) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px !important;
+    }
+
+    /* Bouton envoi — doré */
+    .stChatInput button, .stChatInput [data-testid="stChatInputSubmitButton"] {
+        background-color: #c9a84c !important;
+        color: #0a0e1a !important;
+        border: none !important;
+    }
+    .stChatInput button:hover, .stChatInput [data-testid="stChatInputSubmitButton"]:hover {
+        background-color: #e2c46d !important;
     }
 
     /* Spinner */
