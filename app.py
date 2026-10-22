@@ -259,6 +259,11 @@ st.markdown("""
         letter-spacing: 0.04em;
     }
 
+    /* Bande basse (zone de saisie) — crème */
+    .stBottom, .stBottom > div, [data-testid="stBottom"] {
+        background-color: #F5F0E8 !important;
+    }
+
     /* Spinner */
     .stSpinner > div {
         border-color: #1b1e30 !important;
