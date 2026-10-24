@@ -443,7 +443,7 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 5
+QUESTIONS_GRATUITES = 9999
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 4
 LIMITE_SESSION = 50
@@ -827,6 +827,43 @@ with st.sidebar:
 
         if date_maj and not is_active:
             st.caption(date_maj)
+
+    # Feedback
+    st.markdown("---")
+
+    if "show_feedback" not in st.session_state:
+        st.session_state.show_feedback = False
+
+    if st.button("💬 Donner ton avis", use_container_width=True, key="feedback_btn"):
+        st.session_state.show_feedback = not st.session_state.show_feedback
+
+    if st.session_state.show_feedback:
+        feedback_text = st.text_area(
+            "Ton retour nous aide à améliorer Miroir Intérieur",
+            placeholder="Ce qui t'a plu, ce qui pourrait être mieux...",
+            max_chars=1000,
+            key="feedback_input",
+            label_visibility="collapsed",
+        )
+        if st.button("Envoyer", key="feedback_send"):
+            if feedback_text and feedback_text.strip():
+                try:
+                    requests.post(
+                        f"{SUPABASE_URL}/rest/v1/feedback",
+                        headers=_db_headers(),
+                        json={
+                            "user_id": st.session_state.user_id,
+                            "user_name": st.session_state.user_name,
+                            "content": feedback_text.strip(),
+                        },
+                        timeout=8,
+                    )
+                    st.success("Merci pour ton retour ✨")
+                    st.session_state.show_feedback = False
+                except Exception:
+                    st.error("Erreur, réessaie plus tard.")
+            else:
+                st.warning("Écris quelque chose avant d'envoyer.")
 
     # Déconnexion en bas de sidebar
     st.markdown("---")
