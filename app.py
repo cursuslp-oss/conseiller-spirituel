@@ -805,10 +805,10 @@ else:
     # Questions gratuites disponibles
     restantes = QUESTIONS_GRATUITES - st.session_state.nb_questions
     if restantes > 0:
-        if restantes == QUESTIONS_GRATUITES:
-            texte_offre = f"&#10022; {restantes} questions offertes pour découvrir Miroir Intérieur"
-        else:
+        if restantes == 1:
             texte_offre = "&#10022; Dernière question gratuite"
+        else:
+            texte_offre = f"&#10022; {restantes} questions offertes pour découvrir Miroir Intérieur"
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 0.5rem;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.68rem;
