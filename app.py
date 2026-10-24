@@ -352,6 +352,56 @@ st.markdown("""
         margin-bottom: 2rem;
     }
 
+    /* Sidebar Streamlit */
+    [data-testid="stSidebar"] {
+        background: #060a14 !important;
+        border-right: 1px solid rgba(226,196,109,0.08) !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown span {
+        font-family: 'Inter', sans-serif !important;
+        color: #9a9eb0 !important;
+    }
+    .sidebar-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: #e8e4e0;
+        letter-spacing: 0.02em;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(226,196,109,0.08);
+    }
+    .conv-item {
+        display: block;
+        padding: 0.6rem 0.8rem;
+        margin-bottom: 0.3rem;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 300;
+        color: #7a8090;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+    .conv-item:hover {
+        background: rgba(201, 168, 76, 0.06);
+        border-color: rgba(201, 168, 76, 0.1);
+        color: #c9a84c;
+    }
+    .conv-item.active {
+        background: rgba(201, 168, 76, 0.10);
+        border-color: rgba(201, 168, 76, 0.15);
+        color: #e2c46d;
+    }
+    .conv-date {
+        font-size: 0.6rem;
+        color: #50546a;
+        margin-top: 0.15rem;
+    }
+
     /* Barre utilisateur */
     .user-bar {
         display: flex;
@@ -704,6 +754,93 @@ if "resume_seance" not in st.session_state:
 
 
 # ============================================================
+# SIDEBAR — CONVERSATIONS PASSÉES
+# ============================================================
+
+with st.sidebar:
+    st.markdown('<div class="sidebar-title">Tes conversations</div>', unsafe_allow_html=True)
+
+    # Bouton nouvelle conversation dans la sidebar
+    if st.button("+ Nouvelle conversation", use_container_width=True, key="sidebar_new"):
+        conv = creer_conversation()
+        if conv:
+            st.session_state.conversation_id = conv["id"]
+        st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+        st.session_state.nb_questions = 0
+        st.session_state.resume_seance = ""
+        st.rerun()
+
+    st.markdown("---")
+
+    # Charger et afficher la liste des conversations
+    conversations_list = charger_conversations()
+    for conv in conversations_list:
+        # Déterminer le titre à afficher
+        titre = conv.get("title", "Conversation")
+        if titre == "Nouvelle conversation" or titre == "Première conversation":
+            # Essayer d'utiliser la date comme titre
+            date_str = conv.get("created_at", "")
+            if date_str:
+                try:
+                    dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                    titre = dt.strftime("%d/%m/%Y %H:%M")
+                except Exception:
+                    pass
+
+        # Marquer la conversation active
+        is_active = conv["id"] == st.session_state.get("conversation_id")
+        css_class = "conv-item active" if is_active else "conv-item"
+
+        # Date de dernière mise à jour
+        date_maj = ""
+        updated = conv.get("updated_at", "")
+        if updated:
+            try:
+                dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+                date_maj = dt.strftime("%d/%m à %H:%M")
+            except Exception:
+                pass
+
+        # Bouton pour charger cette conversation
+        if st.button(
+            f"{'● ' if is_active else ''}{titre}",
+            key=f"conv_{conv['id']}",
+            use_container_width=True,
+        ):
+            if not is_active:
+                st.session_state.conversation_id = conv["id"]
+                msgs_db = charger_messages_db(conv["id"])
+                st.session_state.messages = [
+                    {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                ]
+                if msgs_db:
+                    st.session_state.messages.extend(
+                        [{"role": m["role"], "content": m["content"]} for m in msgs_db]
+                    )
+                    st.session_state.nb_questions = sum(
+                        1 for m in msgs_db if m["role"] == "user"
+                    )
+                else:
+                    st.session_state.nb_questions = 0
+                st.session_state.resume_seance = ""
+                st.rerun()
+
+        if date_maj and not is_active:
+            st.caption(date_maj)
+
+    # Déconnexion en bas de sidebar
+    st.markdown("---")
+    st.markdown(
+        f'<span style="font-size:0.7rem; color:#7a8090;">{st.session_state.user_name}</span>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<a href="?action=logout" style="font-size:0.65rem; color:#50546a; text-decoration:none;">Se déconnecter</a>',
+        unsafe_allow_html=True,
+    )
+
+
+# ============================================================
 # INTERFACE PRINCIPALE
 # ============================================================
 
@@ -723,21 +860,6 @@ st.markdown("""
     <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
 </div>
 """, unsafe_allow_html=True)
-
-# --- Bouton nouvelle conversation ---
-col1, col2, col3 = st.columns([1, 1, 1])
-with col2:
-    if st.button("Nouvelle conversation", use_container_width=True):
-        conv = creer_conversation()
-        if conv:
-            st.session_state.conversation_id = conv["id"]
-        st.session_state.messages = [{
-            "role": "assistant",
-            "content": MESSAGE_ACCUEIL
-        }]
-        st.session_state.nb_questions = 0
-        st.session_state.resume_seance = ""
-        st.rerun()
 
 # --- Affichage des messages ---
 for i, message in enumerate(st.session_state.messages):
