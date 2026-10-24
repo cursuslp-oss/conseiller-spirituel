@@ -443,7 +443,7 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 5
+QUESTIONS_GRATUITES = 5000
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 4
 LIMITE_SESSION = 50
