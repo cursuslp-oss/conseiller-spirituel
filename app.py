@@ -80,53 +80,51 @@ st.markdown("""
         text-transform: uppercase;
     }
 
-    /* Messages du chat - base : bulles séparées */
+    /* Messages du chat - bulles séparées */
     .stChatMessage {
         background-color: transparent !important;
         border: none !important;
         padding: 0 !important;
         margin-bottom: 0.8rem !important;
-        border-radius: 0 !important;
-        position: relative !important;
-        max-width: 80% !important;
+        max-width: 78% !important;
     }
 
-    /* Bulles utilisateur — alignées à droite */
+    /* Cacher les avatars */
+    .stChatMessage [data-testid="stChatMessageAvatarUser"],
+    .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
+    .stChatMessage [data-testid="chatAvatarIcon-user"],
+    .stChatMessage [data-testid="chatAvatarIcon-assistant"],
+    .stChatMessage img[alt="user avatar"],
+    .stChatMessage img[alt="assistant avatar"],
+    .stChatMessage .stAvatar {
+        display: none !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        overflow: hidden !important;
+    }
+    .stChatMessage .stAvatar svg {
+        display: none !important;
+    }
+
+    /* Bulles utilisateur — alignées à droite, fond doré */
     .stChatMessage[data-testid="stChatMessage-user"] {
         margin-left: auto !important;
         margin-right: 0 !important;
-    }
-    .stChatMessage[data-testid="stChatMessage-user"] > div:last-child {
         background: rgba(201, 168, 76, 0.10) !important;
         border: 1px solid rgba(201, 168, 76, 0.15) !important;
         border-radius: 18px 18px 4px 18px !important;
         padding: 0.9rem 1.2rem !important;
     }
 
-    /* Bulles assistant — alignées à gauche */
+    /* Bulles assistant — alignées à gauche, fond gris-bleu */
     .stChatMessage[data-testid="stChatMessage-assistant"] {
         margin-right: auto !important;
         margin-left: 0 !important;
-    }
-    .stChatMessage[data-testid="stChatMessage-assistant"] > div:last-child {
         background: rgba(192, 200, 216, 0.06) !important;
         border: 1px solid rgba(192, 200, 216, 0.08) !important;
         border-radius: 18px 18px 18px 4px !important;
         padding: 0.9rem 1.2rem !important;
-    }
-
-    /* Cacher complètement les avatars — les bulles suffisent */
-    .stChatMessage .stAvatar,
-    .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
-    .stChatMessage [data-testid="stChatMessageAvatarUser"],
-    .stChatMessage [data-testid="chatAvatarIcon-assistant"],
-    .stChatMessage [data-testid="chatAvatarIcon-user"],
-    .stChatMessage img[alt="assistant avatar"],
-    .stChatMessage img[alt="user avatar"] {
-        display: none !important;
-    }
-    .stChatMessage .stAvatar svg {
-        display: none !important;
     }
 
     /* Texte des questions utilisateur — doré pâle */
