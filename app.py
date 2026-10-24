@@ -154,19 +154,19 @@ st.markdown("""
         line-height: 1.7 !important;
     }
 
-    /* Zone de saisie */
+    /* Zone de saisie — champ crème sur fond sombre */
     .stChatInput > div {
-        border-color: #1b1e30 !important;
-        background-color: #0f1422 !important;
+        background-color: #F5F0E8 !important;
+        border: none !important;
         border-radius: 24px !important;
     }
     .stChatInput textarea {
-        color: #d0d4e0 !important;
+        color: #2a2520 !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
     }
     .stChatInput textarea::placeholder {
-        color: #464a5a !important;
+        color: #8a8070 !important;
         font-style: italic !important;
     }
 
@@ -218,9 +218,9 @@ st.markdown("""
         letter-spacing: 0.04em;
     }
 
-    /* Bande basse (zone de saisie) — crème avec texture */
+    /* Bande basse — même fond que l'app */
     .stBottom, .stBottom > div, [data-testid="stBottom"] {
-        background: #F5F0E8 repeating-conic-gradient(rgba(120,100,70,0.04) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px !important;
+        background: transparent !important;
     }
 
     /* Bouton envoi — doré */
@@ -443,7 +443,7 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 5000
+QUESTIONS_GRATUITES = 5
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 4
 LIMITE_SESSION = 50
