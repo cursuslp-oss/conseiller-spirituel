@@ -141,15 +141,14 @@ st.markdown("""
         line-height: 1.7 !important;
     }
 
-    /* Texte des réponses du miroir — gris bleuté, serif */
+    /* Texte des réponses du miroir — gris bleuté, même police */
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
     .stChatMessage:has(img[alt="assistant avatar"]) p {
         color: #d0d4e8 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.88rem !important;
         font-weight: 300 !important;
-        line-height: 1.8 !important;
-        font-family: 'Cormorant Garamond', Georgia, serif !important;
+        line-height: 1.7 !important;
     }
 
     /* Zone de saisie */
