@@ -108,7 +108,9 @@ st.markdown("""
     }
 
     /* Bulles utilisateur — alignées à droite, fond doré */
-    .stChatMessage[data-testid="stChatMessage-user"] {
+    .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
+    .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
+    .stChatMessage:has(img[alt="user avatar"]) {
         margin-left: auto !important;
         margin-right: 0 !important;
         background: rgba(201, 168, 76, 0.10) !important;
@@ -118,7 +120,9 @@ st.markdown("""
     }
 
     /* Bulles assistant — alignées à gauche, fond gris-bleu */
-    .stChatMessage[data-testid="stChatMessage-assistant"] {
+    .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
+    .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
+    .stChatMessage:has(img[alt="assistant avatar"]) {
         margin-right: auto !important;
         margin-left: 0 !important;
         background: rgba(192, 200, 216, 0.06) !important;
@@ -128,7 +132,9 @@ st.markdown("""
     }
 
     /* Texte des questions utilisateur — doré pâle */
-    .stChatMessage[data-testid="stChatMessage-user"] p {
+    .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
+    .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
+    .stChatMessage:has(img[alt="user avatar"]) p {
         color: #e8d5a0 !important;
         font-size: 0.88rem !important;
         font-weight: 300 !important;
@@ -136,7 +142,9 @@ st.markdown("""
     }
 
     /* Texte des réponses du miroir — gris bleuté, serif */
-    .stChatMessage[data-testid="stChatMessage-assistant"] p {
+    .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
+    .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
+    .stChatMessage:has(img[alt="assistant avatar"]) p {
         color: #d0d4e8 !important;
         font-size: 0.9rem !important;
         font-weight: 300 !important;
