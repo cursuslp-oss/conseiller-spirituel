@@ -10,7 +10,7 @@ st.set_page_config(
     page_icon="🪞",
     layout="centered",
     initial_sidebar_state="expanded"
-
+)
 # --- Import Google Fonts ---
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
