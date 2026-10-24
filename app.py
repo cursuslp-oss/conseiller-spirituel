@@ -9,8 +9,7 @@ st.set_page_config(
     page_title="Miroir Intérieur",
     page_icon="🪞",
     layout="centered",
-    initial_sidebar_state="auto"
-)
+    initial_sidebar_state="expanded"
 
 # --- Import Google Fonts ---
 st.markdown("""
