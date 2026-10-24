@@ -80,58 +80,42 @@ st.markdown("""
         text-transform: uppercase;
     }
 
-    /* Messages du chat - base */
+    /* Messages du chat - base : bulles séparées */
     .stChatMessage {
         background-color: transparent !important;
         border: none !important;
-        padding: 1rem 0.8rem !important;
-        padding-top: 2rem !important;
-        margin-bottom: 0.6rem !important;
-        border-radius: 12px !important;
+        padding: 0 !important;
+        margin-bottom: 0.8rem !important;
+        border-radius: 0 !important;
         position: relative !important;
+        max-width: 80% !important;
     }
 
-    /* Messages de l'utilisateur */
+    /* Bulles utilisateur — alignées à droite */
     .stChatMessage[data-testid="stChatMessage-user"] {
-        background-color: rgba(201, 168, 76, 0.10) !important;
-        border-left: 2px solid rgba(201, 168, 76, 0.4) !important;
+        margin-left: auto !important;
+        margin-right: 0 !important;
+    }
+    .stChatMessage[data-testid="stChatMessage-user"] > div:last-child {
+        background: rgba(201, 168, 76, 0.10) !important;
+        border: 1px solid rgba(201, 168, 76, 0.15) !important;
+        border-radius: 18px 18px 4px 18px !important;
+        padding: 0.9rem 1.2rem !important;
     }
 
-    /* Label "Ma question" */
-    .stChatMessage[data-testid="stChatMessage-user"]::before {
-        content: "Ma question";
-        position: absolute;
-        top: 0.5rem;
-        left: 1rem;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.62rem;
-        font-weight: 400;
-        color: #c9a84c;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-    }
-
-    /* Réponses de Miroir Intérieur */
+    /* Bulles assistant — alignées à gauche */
     .stChatMessage[data-testid="stChatMessage-assistant"] {
-        background-color: rgba(192, 200, 216, 0.06) !important;
-        border-left: 2px solid rgba(192, 200, 216, 0.2) !important;
+        margin-right: auto !important;
+        margin-left: 0 !important;
+    }
+    .stChatMessage[data-testid="stChatMessage-assistant"] > div:last-child {
+        background: rgba(192, 200, 216, 0.06) !important;
+        border: 1px solid rgba(192, 200, 216, 0.08) !important;
+        border-radius: 18px 18px 18px 4px !important;
+        padding: 0.9rem 1.2rem !important;
     }
 
-    /* Label "Le miroir" */
-    .stChatMessage[data-testid="stChatMessage-assistant"]::before {
-        content: "Le miroir";
-        position: absolute;
-        top: 0.5rem;
-        left: 1rem;
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 0.72rem;
-        font-weight: 400;
-        color: #9a9eb0;
-        letter-spacing: 0.08em;
-        font-style: italic;
-    }
-
-    /* Remplacer les avatars par des symboles */
+    /* Cacher complètement les avatars — les bulles suffisent */
     .stChatMessage .stAvatar,
     .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
     .stChatMessage [data-testid="stChatMessageAvatarUser"],
@@ -141,58 +125,25 @@ st.markdown("""
     .stChatMessage img[alt="user avatar"] {
         display: none !important;
     }
-    /* Symbole doré ✦ pour le miroir */
-    .stChatMessage[data-testid="stChatMessage-assistant"] .stAvatar {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        background: transparent !important;
-        border: none !important;
-        width: 28px !important;
-        height: 28px !important;
-        font-size: 1.1rem;
-        color: #c9a84c;
-    }
-    .stChatMessage[data-testid="stChatMessage-assistant"] .stAvatar::after {
-        content: "✦";
-        color: #c9a84c;
-    }
-    /* Symbole gris ○ pour l'utilisateur */
-    .stChatMessage[data-testid="stChatMessage-user"] .stAvatar {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        background: transparent !important;
-        border: none !important;
-        width: 28px !important;
-        height: 28px !important;
-        font-size: 0.9rem;
-        color: #7a8090;
-    }
-    .stChatMessage[data-testid="stChatMessage-user"] .stAvatar::after {
-        content: "○";
-        color: #7a8090;
-    }
-    /* Cacher les SVG dans les avatars */
     .stChatMessage .stAvatar svg {
         display: none !important;
     }
 
-    /* Texte des questions utilisateur - doré pâle, italique */
+    /* Texte des questions utilisateur — doré pâle */
     .stChatMessage[data-testid="stChatMessage-user"] p {
         color: #e8d5a0 !important;
-        font-size: 0.92rem !important;
-        font-weight: 400 !important;
-        line-height: 1.8 !important;
-        font-style: italic !important;
+        font-size: 0.88rem !important;
+        font-weight: 300 !important;
+        line-height: 1.7 !important;
     }
 
-    /* Texte des réponses du miroir - gris bleuté clair */
+    /* Texte des réponses du miroir — gris bleuté, serif */
     .stChatMessage[data-testid="stChatMessage-assistant"] p {
         color: #d0d4e8 !important;
-        font-size: 0.93rem !important;
-        font-weight: 400 !important;
+        font-size: 0.9rem !important;
+        font-weight: 300 !important;
         line-height: 1.8 !important;
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
     }
 
     /* Zone de saisie */
@@ -290,6 +241,17 @@ st.markdown("""
     @media (max-width: 640px) {
         .pricing-grid {
             grid-template-columns: 1fr;
+        }
+        .welcome-message {
+            padding: 1rem 1.2rem;
+            font-size: 0.85rem;
+            max-width: 100%;
+        }
+        .header-title {
+            font-size: 2rem;
+        }
+        .stChatMessage {
+            max-width: 88% !important;
         }
     }
 
@@ -390,7 +352,7 @@ CLE_API = st.secrets["ANTHROPIC_API_KEY"]
 # --- Prompt système (stocké dans Streamlit Secrets pour protéger le contenu) ---
 PROMPT_SYSTEME = st.secrets["PROMPT_SYSTEME"]
 
-MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur. Si tu es prêt(e) à regarder, on y va."
+MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- En-tête ---
 st.markdown("""
@@ -477,7 +439,7 @@ with col2:
 # --- Affichage des messages ---
 for i, message in enumerate(st.session_state.messages):
     # Premier message assistant = accueil → style distinct
-    if i == 0 and message["role"] == "assistant" and message["content"] == MESSAGE_ACCUEIL:
+    if i == 0 and message["role"] == "assistant":
         st.markdown(f'<div class="welcome-message">{message["content"]}</div>', unsafe_allow_html=True)
     else:
         with st.chat_message(message["role"]):
