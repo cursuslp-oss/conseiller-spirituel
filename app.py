@@ -9,8 +9,9 @@ st.set_page_config(
     page_title="Miroir Intérieur",
     page_icon="🪞",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
+
 # --- Import Google Fonts ---
 st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
@@ -19,11 +20,11 @@ st.markdown("""
 # --- Style personnalisé ---
 st.markdown("""
 <style>
-    /* Fond bleu nuit profond avec texture grain */
-    .stApp {
+    /* ===== MODE SOMBRE (défaut) ===== */
+    .stApp.dark-mode {
         background: linear-gradient(180deg, #020308 0%, #060a14 30%, #0a0e1a 70%, #0d1225 100%);
     }
-    .stApp::before {
+    .stApp.dark-mode::before {
         content: "";
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -31,7 +32,7 @@ st.markdown("""
         pointer-events: none;
         z-index: 0;
     }
-    .stApp::after {
+    .stApp.dark-mode::after {
         content: "";
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -40,13 +41,27 @@ st.markdown("""
         z-index: 0;
     }
 
+    /* ===== MODE CLAIR ===== */
+    .stApp.light-mode {
+        background: linear-gradient(180deg, #FAF8F3 0%, #F5F0E8 50%, #EDE6D8 100%);
+    }
+    .stApp.light-mode::before,
+    .stApp.light-mode::after {
+        display: none;
+    }
+
     /* Typographie globale */
     .stApp, .stChatMessage p, .stMarkdown p {
         font-family: 'Inter', -apple-system, sans-serif !important;
         font-weight: 300;
         letter-spacing: 0.01em;
         line-height: 1.8;
+    }
+    .stApp.dark-mode, .dark-mode .stChatMessage p, .dark-mode .stMarkdown p {
         color: #d0d4e8 !important;
+    }
+    .stApp.light-mode, .light-mode .stChatMessage p, .light-mode .stMarkdown p {
+        color: #3a3530 !important;
     }
 
     /* Cacher le menu hamburger et le footer */
@@ -60,11 +75,19 @@ st.markdown("""
         padding: 3rem 1rem 1.5rem 1rem;
         margin-bottom: 1rem;
     }
-    .header-title {
+    .dark-mode .header-title {
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 2.6rem;
         font-weight: 300;
         color: #e8e4e0;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.6rem;
+    }
+    .light-mode .header-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 2.6rem;
+        font-weight: 300;
+        color: #2a2520;
         letter-spacing: 0.03em;
         margin-bottom: 0.6rem;
     }
@@ -74,11 +97,19 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, #e2c46d, transparent);
         margin: 0.8rem auto;
     }
-    .header-sub {
+    .dark-mode .header-sub {
         font-family: 'Inter', sans-serif;
         font-size: 0.78rem;
         font-weight: 300;
         color: #c0c4d0 !important;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+    }
+    .light-mode .header-sub {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 300;
+        color: #8a8070 !important;
         letter-spacing: 0.15em;
         text-transform: uppercase;
     }
@@ -110,71 +141,121 @@ st.markdown("""
         display: none !important;
     }
 
-    /* Bulles utilisateur — alignées à droite, fond doré */
+    /* Bulles utilisateur — alignées à droite */
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
     .stChatMessage:has(img[alt="user avatar"]) {
         margin-left: auto !important;
         margin-right: 0 !important;
-        background: rgba(201, 168, 76, 0.10) !important;
-        border: 1px solid rgba(201, 168, 76, 0.15) !important;
         border-radius: 18px 18px 4px 18px !important;
         padding: 0.9rem 1.2rem !important;
     }
+    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
+    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
+    .dark-mode .stChatMessage:has(img[alt="user avatar"]) {
+        background: rgba(201, 168, 76, 0.10) !important;
+        border: 1px solid rgba(201, 168, 76, 0.15) !important;
+    }
+    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
+    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
+    .light-mode .stChatMessage:has(img[alt="user avatar"]) {
+        background: rgba(139, 105, 20, 0.08) !important;
+        border: 1px solid rgba(139, 105, 20, 0.12) !important;
+    }
 
-    /* Bulles assistant — alignées à gauche, fond gris-bleu */
+    /* Bulles assistant — alignées à gauche */
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
     .stChatMessage:has(img[alt="assistant avatar"]) {
         margin-right: auto !important;
         margin-left: 0 !important;
-        background: rgba(192, 200, 216, 0.06) !important;
-        border: 1px solid rgba(192, 200, 216, 0.08) !important;
         border-radius: 18px 18px 18px 4px !important;
         padding: 0.9rem 1.2rem !important;
     }
+    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
+    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
+    .dark-mode .stChatMessage:has(img[alt="assistant avatar"]) {
+        background: rgba(192, 200, 216, 0.06) !important;
+        border: 1px solid rgba(192, 200, 216, 0.08) !important;
+    }
+    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
+    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
+    .light-mode .stChatMessage:has(img[alt="assistant avatar"]) {
+        background: rgba(139, 105, 20, 0.04) !important;
+        border: 1px solid rgba(139, 105, 20, 0.08) !important;
+    }
 
-    /* Texte des questions utilisateur — doré pâle */
+    /* Texte des questions utilisateur */
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
     .stChatMessage:has(img[alt="user avatar"]) p {
-        color: #e8d5a0 !important;
         font-size: 0.88rem !important;
         font-weight: 300 !important;
         line-height: 1.7 !important;
     }
+    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
+    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
+    .dark-mode .stChatMessage:has(img[alt="user avatar"]) p {
+        color: #e8d5a0 !important;
+    }
+    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
+    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
+    .light-mode .stChatMessage:has(img[alt="user avatar"]) p {
+        color: #4a3f30 !important;
+    }
 
-    /* Texte des réponses du miroir — gris bleuté, même police */
+    /* Texte des réponses du miroir */
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
     .stChatMessage:has(img[alt="assistant avatar"]) p {
-        color: #d0d4e8 !important;
         font-size: 0.88rem !important;
         font-weight: 300 !important;
         line-height: 1.7 !important;
     }
+    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
+    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
+    .dark-mode .stChatMessage:has(img[alt="assistant avatar"]) p {
+        color: #d0d4e8 !important;
+    }
+    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
+    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
+    .light-mode .stChatMessage:has(img[alt="assistant avatar"]) p {
+        color: #3a3530 !important;
+    }
 
-    /* Zone de saisie — champ crème sur fond sombre */
+    /* Zone de saisie */
     .stChatInput > div {
-        background-color: #F5F0E8 !important;
         border: none !important;
         border-radius: 24px !important;
     }
+    .dark-mode .stChatInput > div {
+        background-color: #F5F0E8 !important;
+    }
+    .light-mode .stChatInput > div {
+        background-color: #2a2520 !important;
+    }
     .stChatInput textarea {
-        color: #2a2520 !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
     }
-    .stChatInput textarea::placeholder {
+    .dark-mode .stChatInput textarea {
+        color: #2a2520 !important;
+    }
+    .light-mode .stChatInput textarea {
+        color: #F5F0E8 !important;
+    }
+    .dark-mode .stChatInput textarea::placeholder {
         color: #8a8070 !important;
+        font-style: italic !important;
+    }
+    .light-mode .stChatInput textarea::placeholder {
+        color: #a09585 !important;
         font-style: italic !important;
     }
 
     /* Bouton Nouvelle conversation — discret */
     .stButton > button {
         background-color: transparent !important;
-        color: #50546a !important;
-        border: 1px solid rgba(27, 30, 48, 0.5) !important;
         border-radius: 20px !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
@@ -183,6 +264,14 @@ st.markdown("""
         padding: 0.35rem 1.2rem !important;
         transition: all 0.3s ease !important;
         opacity: 0.7 !important;
+    }
+    .dark-mode .stButton > button {
+        color: #50546a !important;
+        border: 1px solid rgba(27, 30, 48, 0.5) !important;
+    }
+    .light-mode .stButton > button {
+        color: #8a8070 !important;
+        border: 1px solid rgba(139, 105, 20, 0.2) !important;
     }
     .stButton > button:hover {
         border-color: #a08230 !important;
@@ -197,14 +286,21 @@ st.markdown("""
         font-size: 0.95rem;
         font-weight: 300;
         font-style: italic;
-        color: #9a9eb0;
         line-height: 2;
         letter-spacing: 0.02em;
         padding: 1.5rem 2rem;
         margin: 0 auto 1rem auto;
         max-width: 520px;
+    }
+    .dark-mode .welcome-message {
+        color: #9a9eb0;
         border-top: 1px solid rgba(226,196,109,0.08);
         border-bottom: 1px solid rgba(226,196,109,0.08);
+    }
+    .light-mode .welcome-message {
+        color: #8a8070;
+        border-top: 1px solid rgba(139, 105, 20, 0.1);
+        border-bottom: 1px solid rgba(139, 105, 20, 0.1);
     }
 
     /* Disclaimer en bas */
@@ -443,7 +539,7 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 9999
+QUESTIONS_GRATUITES = 5
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 4
 LIMITE_SESSION = 50
