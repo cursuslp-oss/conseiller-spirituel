@@ -490,6 +490,24 @@ st.markdown(f"""
     .user-bar a:hover {{
         color: #c9a84c;
     }}
+
+    /* Style du toggle on/off thème */
+    [data-testid="stToggle"] {{
+        display: flex;
+        justify-content: center;
+    }}
+    [data-testid="stToggle"] label {{
+        gap: 0 !important;
+    }}
+    [data-testid="stToggle"] [data-testid="stThumbValue"] {{
+        display: none !important;
+    }}
+    [data-testid="stToggle"] span[data-baseweb="toggle"] {{
+        background-color: {"rgba(255,255,255,0.12)" if IS_DARK else "rgba(0,0,0,0.1)"} !important;
+    }}
+    [data-testid="stToggle"] span[data-baseweb="toggle"][aria-checked="true"] {{
+        background-color: {"#c9a84c" if IS_DARK else "#8B6914"} !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -629,12 +647,16 @@ if not st.session_state.user:
     """, unsafe_allow_html=True)
 
     # Toggle thème sur page de login
-    _lc1, _lc2, _lc3 = st.columns([4, 1, 4])
+    _lc1, _lc2, _lc3 = st.columns([5, 1, 5])
     with _lc2:
-        _li = "☀️" if IS_DARK else "🌙"
-        if st.button(_li, key="theme_toggle_login", help="Changer de thème"):
-            st.session_state.theme = "light" if IS_DARK else "dark"
-            st.rerun()
+        if st.toggle("🌙", value=IS_DARK, key="theme_toggle_login", label_visibility="collapsed"):
+            if not IS_DARK:
+                st.session_state.theme = "dark"
+                st.rerun()
+        else:
+            if IS_DARK:
+                st.session_state.theme = "light"
+                st.rerun()
 
     # URL d'authentification Google
     google_auth_url = (
@@ -981,12 +1003,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Toggle thème (visible sans sidebar) ---
-_toggle_col1, _toggle_col2, _toggle_col3 = st.columns([4, 1, 4])
+_toggle_col1, _toggle_col2, _toggle_col3 = st.columns([5, 1, 5])
 with _toggle_col2:
-    _theme_icon = "☀️" if IS_DARK else "🌙"
-    if st.button(_theme_icon, key="theme_toggle_main", help="Changer de thème"):
-        st.session_state.theme = "light" if IS_DARK else "dark"
-        st.rerun()
+    if st.toggle("🌙", value=IS_DARK, key="theme_toggle_main", label_visibility="collapsed"):
+        if not IS_DARK:
+            st.session_state.theme = "dark"
+            st.rerun()
+    else:
+        if IS_DARK:
+            st.session_state.theme = "light"
+            st.rerun()
 
 # --- Affichage des messages ---
 for i, message in enumerate(st.session_state.messages):
