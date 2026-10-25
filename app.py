@@ -17,245 +17,236 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
-# --- Style personnalisé ---
-st.markdown("""
+# --- Thème sombre/clair ---
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+IS_DARK = st.session_state.theme == "dark"
+
+# --- Style personnalisé (conditionnel selon le thème) ---
+if IS_DARK:
+    _bg = "linear-gradient(180deg, #020308 0%, #060a14 30%, #0a0e1a 70%, #0d1225 100%)"
+    _bg_before = 'content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 50% 18%,rgba(226,196,109,0.03) 0%,transparent 70%);pointer-events:none;z-index:0;'
+    _bg_after = 'content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-conic-gradient(rgba(200,200,200,0.008) 0% 25%,transparent 0% 50%) 0 0/3px 3px;pointer-events:none;z-index:0;'
+    _text = "#d0d4e8"
+    _title = "#e8e4e0"
+    _sub = "#c0c4d0"
+    _line_grad = "linear-gradient(90deg, transparent, #e2c46d, transparent)"
+    _user_bg = "rgba(201, 168, 76, 0.10)"
+    _user_border = "rgba(201, 168, 76, 0.15)"
+    _user_text = "#e8d5a0"
+    _asst_bg = "rgba(192, 200, 216, 0.06)"
+    _asst_border = "rgba(192, 200, 216, 0.08)"
+    _asst_text = "#d0d4e8"
+    _input_bg = "#F5F0E8"
+    _input_text = "#2a2520"
+    _input_ph = "#8a8070"
+    _btn_color = "#50546a"
+    _btn_border = "rgba(27, 30, 48, 0.5)"
+    _send_bg = "#c9a84c"
+    _send_color = "#0a0e1a"
+    _welcome = "#9a9eb0"
+    _welcome_border = "rgba(226,196,109,0.08)"
+    _disclaimer = "#464a5a"
+    _spinner = "#1b1e30"
+    _card_border = "#1b1e30"
+    _card_bg = "rgba(15, 20, 34, 0.6)"
+    _card_pop = "#c9a84c"
+    _badge = "#e2c46d"
+    _pname = "#e2c46d"
+    _pprice = "#e8e4e0"
+    _pspan = "#7a8090"
+    _pdetail = "#7a8090"
+    _pw_title = "#e8e4e0"
+    _pw_sub = "#7a8090"
+    _sidebar_bg = "#060a14"
+    _sidebar_border = "rgba(226,196,109,0.08)"
+    _sidebar_text = "#9a9eb0"
+    _stitle = "#e8e4e0"
+    _stitle_border = "rgba(226,196,109,0.08)"
+    _conv = "#7a8090"
+    _conv_active = "#e2c46d"
+    _conv_date = "#50546a"
+    _uname = "#7a8090"
+    _ulink = "#50546a"
+else:
+    _bg = "linear-gradient(180deg, #FAF8F3 0%, #F5F0E8 50%, #EDE6D8 100%)"
+    _bg_before = "display:none;"
+    _bg_after = "display:none;"
+    _text = "#3a3530"
+    _title = "#2a2520"
+    _sub = "#8a8070"
+    _line_grad = "linear-gradient(90deg, transparent, #B8942A, transparent)"
+    _user_bg = "rgba(139, 105, 20, 0.08)"
+    _user_border = "rgba(139, 105, 20, 0.12)"
+    _user_text = "#4a3f30"
+    _asst_bg = "rgba(139, 105, 20, 0.04)"
+    _asst_border = "rgba(139, 105, 20, 0.08)"
+    _asst_text = "#3a3530"
+    _input_bg = "#2a2520"
+    _input_text = "#F5F0E8"
+    _input_ph = "#a09585"
+    _btn_color = "#8a8070"
+    _btn_border = "rgba(139, 105, 20, 0.2)"
+    _send_bg = "#8B6914"
+    _send_color = "#FAF8F3"
+    _welcome = "#8a8070"
+    _welcome_border = "rgba(139, 105, 20, 0.1)"
+    _disclaimer = "#b0a898"
+    _spinner = "rgba(139, 105, 20, 0.15)"
+    _card_border = "rgba(139, 105, 20, 0.12)"
+    _card_bg = "rgba(255, 255, 255, 0.6)"
+    _card_pop = "#8B6914"
+    _badge = "#8B6914"
+    _pname = "#8B6914"
+    _pprice = "#2a2520"
+    _pspan = "#9a9080"
+    _pdetail = "#9a9080"
+    _pw_title = "#2a2520"
+    _pw_sub = "#9a9080"
+    _sidebar_bg = "#F0EBE0"
+    _sidebar_border = "rgba(139, 105, 20, 0.1)"
+    _sidebar_text = "#6a6050"
+    _stitle = "#2a2520"
+    _stitle_border = "rgba(139, 105, 20, 0.1)"
+    _conv = "#8a8070"
+    _conv_active = "#8B6914"
+    _conv_date = "#b0a898"
+    _uname = "#8a8070"
+    _ulink = "#b0a898"
+
+st.markdown(f"""
 <style>
-    /* ===== MODE SOMBRE (défaut) ===== */
-    .stApp.dark-mode {
-        background: linear-gradient(180deg, #020308 0%, #060a14 30%, #0a0e1a 70%, #0d1225 100%);
-    }
-    .stApp.dark-mode::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(ellipse 60% 40% at 50% 18%, rgba(226,196,109,0.03) 0%, transparent 70%);
-        pointer-events: none;
-        z-index: 0;
-    }
-    .stApp.dark-mode::after {
-        content: "";
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: repeating-conic-gradient(rgba(200,200,200,0.008) 0% 25%, transparent 0% 50%) 0 0 / 3px 3px;
-        pointer-events: none;
-        z-index: 0;
-    }
+    .stApp {{
+        background: {_bg};
+    }}
+    .stApp::before {{ {_bg_before} }}
+    .stApp::after {{ {_bg_after} }}
 
-    /* ===== MODE CLAIR ===== */
-    .stApp.light-mode {
-        background: linear-gradient(180deg, #FAF8F3 0%, #F5F0E8 50%, #EDE6D8 100%);
-    }
-    .stApp.light-mode::before,
-    .stApp.light-mode::after {
-        display: none;
-    }
-
-    /* Typographie globale */
-    .stApp, .stChatMessage p, .stMarkdown p {
+    .stApp, .stChatMessage p, .stMarkdown p {{
         font-family: 'Inter', -apple-system, sans-serif !important;
         font-weight: 300;
         letter-spacing: 0.01em;
         line-height: 1.8;
-    }
-    .stApp.dark-mode, .dark-mode .stChatMessage p, .dark-mode .stMarkdown p {
-        color: #d0d4e8 !important;
-    }
-    .stApp.light-mode, .light-mode .stChatMessage p, .light-mode .stMarkdown p {
-        color: #3a3530 !important;
-    }
+        color: {_text} !important;
+    }}
 
-    /* Cacher le menu hamburger et le footer */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
 
-    /* En-tête personnalisé */
-    .header-container {
+    .header-container {{
         text-align: center;
         padding: 3rem 1rem 1.5rem 1rem;
         margin-bottom: 1rem;
-    }
-    .dark-mode .header-title {
+    }}
+    .header-title {{
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 2.6rem;
         font-weight: 300;
-        color: #e8e4e0;
+        color: {_title};
         letter-spacing: 0.03em;
         margin-bottom: 0.6rem;
-    }
-    .light-mode .header-title {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 2.6rem;
-        font-weight: 300;
-        color: #2a2520;
-        letter-spacing: 0.03em;
-        margin-bottom: 0.6rem;
-    }
-    .header-line {
+    }}
+    .header-line {{
         width: 50px;
         height: 1px;
-        background: linear-gradient(90deg, transparent, #e2c46d, transparent);
         margin: 0.8rem auto;
-    }
-    .dark-mode .header-sub {
+        background: {_line_grad};
+    }}
+    .header-sub {{
         font-family: 'Inter', sans-serif;
         font-size: 0.78rem;
         font-weight: 300;
-        color: #c0c4d0 !important;
+        color: {_sub} !important;
         letter-spacing: 0.15em;
         text-transform: uppercase;
-    }
-    .light-mode .header-sub {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.78rem;
-        font-weight: 300;
-        color: #8a8070 !important;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-    }
+    }}
 
-    /* Messages du chat - bulles séparées */
-    .stChatMessage {
+    .stChatMessage {{
         background-color: transparent !important;
         border: none !important;
         padding: 0 !important;
         margin-bottom: 0.8rem !important;
         max-width: 78% !important;
-    }
+    }}
 
-    /* Cacher les avatars */
     .stChatMessage [data-testid="stChatMessageAvatarUser"],
     .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
     .stChatMessage [data-testid="chatAvatarIcon-user"],
     .stChatMessage [data-testid="chatAvatarIcon-assistant"],
     .stChatMessage img[alt="user avatar"],
     .stChatMessage img[alt="assistant avatar"],
-    .stChatMessage .stAvatar {
+    .stChatMessage .stAvatar {{
         display: none !important;
         width: 0 !important;
         min-width: 0 !important;
         max-width: 0 !important;
         overflow: hidden !important;
-    }
-    .stChatMessage .stAvatar svg {
+    }}
+    .stChatMessage .stAvatar svg {{
         display: none !important;
-    }
+    }}
 
-    /* Bulles utilisateur — alignées à droite */
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
-    .stChatMessage:has(img[alt="user avatar"]) {
+    .stChatMessage:has(img[alt="user avatar"]) {{
         margin-left: auto !important;
         margin-right: 0 !important;
+        background: {_user_bg} !important;
+        border: 1px solid {_user_border} !important;
         border-radius: 18px 18px 4px 18px !important;
         padding: 0.9rem 1.2rem !important;
-    }
-    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
-    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
-    .dark-mode .stChatMessage:has(img[alt="user avatar"]) {
-        background: rgba(201, 168, 76, 0.10) !important;
-        border: 1px solid rgba(201, 168, 76, 0.15) !important;
-    }
-    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
-    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
-    .light-mode .stChatMessage:has(img[alt="user avatar"]) {
-        background: rgba(139, 105, 20, 0.08) !important;
-        border: 1px solid rgba(139, 105, 20, 0.12) !important;
-    }
+    }}
 
-    /* Bulles assistant — alignées à gauche */
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
-    .stChatMessage:has(img[alt="assistant avatar"]) {
+    .stChatMessage:has(img[alt="assistant avatar"]) {{
         margin-right: auto !important;
         margin-left: 0 !important;
+        background: {_asst_bg} !important;
+        border: 1px solid {_asst_border} !important;
         border-radius: 18px 18px 18px 4px !important;
         padding: 0.9rem 1.2rem !important;
-    }
-    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
-    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
-    .dark-mode .stChatMessage:has(img[alt="assistant avatar"]) {
-        background: rgba(192, 200, 216, 0.06) !important;
-        border: 1px solid rgba(192, 200, 216, 0.08) !important;
-    }
-    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
-    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
-    .light-mode .stChatMessage:has(img[alt="assistant avatar"]) {
-        background: rgba(139, 105, 20, 0.04) !important;
-        border: 1px solid rgba(139, 105, 20, 0.08) !important;
-    }
+    }}
 
-    /* Texte des questions utilisateur */
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
-    .stChatMessage:has(img[alt="user avatar"]) p {
+    .stChatMessage:has(img[alt="user avatar"]) p {{
+        color: {_user_text} !important;
         font-size: 0.88rem !important;
         font-weight: 300 !important;
         line-height: 1.7 !important;
-    }
-    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
-    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
-    .dark-mode .stChatMessage:has(img[alt="user avatar"]) p {
-        color: #e8d5a0 !important;
-    }
-    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
-    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
-    .light-mode .stChatMessage:has(img[alt="user avatar"]) p {
-        color: #4a3f30 !important;
-    }
+    }}
 
-    /* Texte des réponses du miroir */
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
-    .stChatMessage:has(img[alt="assistant avatar"]) p {
+    .stChatMessage:has(img[alt="assistant avatar"]) p {{
+        color: {_asst_text} !important;
         font-size: 0.88rem !important;
         font-weight: 300 !important;
         line-height: 1.7 !important;
-    }
-    .dark-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
-    .dark-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
-    .dark-mode .stChatMessage:has(img[alt="assistant avatar"]) p {
-        color: #d0d4e8 !important;
-    }
-    .light-mode .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
-    .light-mode .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
-    .light-mode .stChatMessage:has(img[alt="assistant avatar"]) p {
-        color: #3a3530 !important;
-    }
+    }}
 
-    /* Zone de saisie */
-    .stChatInput > div {
+    .stChatInput > div {{
+        background-color: {_input_bg} !important;
         border: none !important;
         border-radius: 24px !important;
-    }
-    .dark-mode .stChatInput > div {
-        background-color: #F5F0E8 !important;
-    }
-    .light-mode .stChatInput > div {
-        background-color: #2a2520 !important;
-    }
-    .stChatInput textarea {
+    }}
+    .stChatInput textarea {{
+        color: {_input_text} !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
-    }
-    .dark-mode .stChatInput textarea {
-        color: #2a2520 !important;
-    }
-    .light-mode .stChatInput textarea {
-        color: #F5F0E8 !important;
-    }
-    .dark-mode .stChatInput textarea::placeholder {
-        color: #8a8070 !important;
+    }}
+    .stChatInput textarea::placeholder {{
+        color: {_input_ph} !important;
         font-style: italic !important;
-    }
-    .light-mode .stChatInput textarea::placeholder {
-        color: #a09585 !important;
-        font-style: italic !important;
-    }
+    }}
 
-    /* Bouton Nouvelle conversation — discret */
-    .stButton > button {
+    .stButton > button {{
         background-color: transparent !important;
+        color: {_btn_color} !important;
+        border: 1px solid {_btn_border} !important;
         border-radius: 20px !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 300 !important;
@@ -264,149 +255,127 @@ st.markdown("""
         padding: 0.35rem 1.2rem !important;
         transition: all 0.3s ease !important;
         opacity: 0.7 !important;
-    }
-    .dark-mode .stButton > button {
-        color: #50546a !important;
-        border: 1px solid rgba(27, 30, 48, 0.5) !important;
-    }
-    .light-mode .stButton > button {
-        color: #8a8070 !important;
-        border: 1px solid rgba(139, 105, 20, 0.2) !important;
-    }
-    .stButton > button:hover {
+    }}
+    .stButton > button:hover {{
         border-color: #a08230 !important;
         color: #c9a84c !important;
         background-color: transparent !important;
-    }
+    }}
 
-    /* Message d'accueil — distinct du chat */
-    .welcome-message {
+    .welcome-message {{
         text-align: center;
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 0.95rem;
         font-weight: 300;
         font-style: italic;
+        color: {_welcome};
         line-height: 2;
         letter-spacing: 0.02em;
         padding: 1.5rem 2rem;
         margin: 0 auto 1rem auto;
         max-width: 520px;
-    }
-    .dark-mode .welcome-message {
-        color: #9a9eb0;
-        border-top: 1px solid rgba(226,196,109,0.08);
-        border-bottom: 1px solid rgba(226,196,109,0.08);
-    }
-    .light-mode .welcome-message {
-        color: #8a8070;
-        border-top: 1px solid rgba(139, 105, 20, 0.1);
-        border-bottom: 1px solid rgba(139, 105, 20, 0.1);
-    }
+        border-top: 1px solid {_welcome_border};
+        border-bottom: 1px solid {_welcome_border};
+    }}
 
-    /* Disclaimer en bas */
-    .disclaimer, .disclaimer * {
+    .disclaimer, .disclaimer * {{
         text-align: center;
-        color: #464a5a !important;
+        color: {_disclaimer} !important;
         font-family: 'Inter', sans-serif;
         font-size: 0.62rem;
         font-weight: 200;
         padding: 2rem 1rem 1rem 1rem;
         letter-spacing: 0.04em;
-    }
+    }}
 
-    /* Bande basse — même fond que l'app */
-    .stBottom, .stBottom > div, [data-testid="stBottom"] {
+    .stBottom, .stBottom > div, [data-testid="stBottom"] {{
         background: transparent !important;
-    }
+    }}
 
-    /* Bouton envoi — doré */
-    .stChatInput button, .stChatInput [data-testid="stChatInputSubmitButton"] {
-        background-color: #c9a84c !important;
-        color: #0a0e1a !important;
+    .stChatInput button, .stChatInput [data-testid="stChatInputSubmitButton"] {{
+        background-color: {_send_bg} !important;
+        color: {_send_color} !important;
         border: none !important;
-    }
-    .stChatInput button:hover, .stChatInput [data-testid="stChatInputSubmitButton"]:hover {
+    }}
+    .stChatInput button:hover, .stChatInput [data-testid="stChatInputSubmitButton"]:hover {{
         background-color: #e2c46d !important;
-    }
+    }}
 
-    /* Spinner */
-    .stSpinner > div {
-        border-color: #1b1e30 !important;
-    }
+    .stSpinner > div {{
+        border-color: {_spinner} !important;
+    }}
 
-    /* Grille des cartes */
-    .pricing-grid {
+    .pricing-grid {{
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         padding: 0 0.5rem;
         margin-bottom: 1.5rem;
-    }
-    @media (max-width: 640px) {
-        .pricing-grid {
+    }}
+    @media (max-width: 640px) {{
+        .pricing-grid {{
             grid-template-columns: 1fr;
-        }
-        .welcome-message {
+        }}
+        .welcome-message {{
             padding: 1rem 1.2rem;
             font-size: 0.85rem;
             max-width: 100%;
-        }
-        .header-title {
+        }}
+        .header-title {{
             font-size: 2rem;
-        }
-        .stChatMessage {
+        }}
+        .stChatMessage {{
             max-width: 88% !important;
-        }
-    }
+        }}
+    }}
 
-    /* Cartes de prix */
-    .pricing-card {
-        border: 1px solid #1b1e30;
+    .pricing-card {{
+        border: 1px solid {_card_border};
         border-radius: 16px;
         padding: 1.5rem 1rem;
         text-align: center;
-        background: rgba(15, 20, 34, 0.6);
+        background: {_card_bg};
         transition: border-color 0.3s ease;
         margin-bottom: 0.8rem;
-    }
-    .pricing-card.populaire {
-        border-color: #c9a84c;
-    }
-    .pricing-badge {
+    }}
+    .pricing-card.populaire {{
+        border-color: {_card_pop};
+    }}
+    .pricing-badge {{
         font-family: 'Inter', sans-serif;
         font-size: 0.58rem;
         font-weight: 400;
-        color: #e2c46d;
+        color: {_badge};
         letter-spacing: 0.1em;
         text-transform: uppercase;
         margin-bottom: 0.5rem;
-    }
-    .pricing-name {
+    }}
+    .pricing-name {{
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 1.2rem;
         font-weight: 400;
-        color: #e2c46d;
+        color: {_pname};
         margin-bottom: 0.3rem;
-    }
-    .pricing-price {
+    }}
+    .pricing-price {{
         font-family: 'Inter', sans-serif;
         font-size: 1.6rem;
         font-weight: 300;
-        color: #e8e4e0;
+        color: {_pprice};
         margin-bottom: 0.2rem;
-    }
-    .pricing-price span {
+    }}
+    .pricing-price span {{
         font-size: 0.75rem;
-        color: #7a8090;
-    }
-    .pricing-detail {
+        color: {_pspan};
+    }}
+    .pricing-detail {{
         font-family: 'Inter', sans-serif;
         font-size: 0.7rem;
         font-weight: 300;
-        color: #7a8090;
+        color: {_pdetail};
         margin-bottom: 1rem;
-    }
-    .pricing-cta {
+    }}
+    .pricing-cta {{
         display: inline-block;
         padding: 0.6rem 2rem;
         background: linear-gradient(135deg, #c9a84c, #a08230);
@@ -421,54 +390,52 @@ st.markdown("""
         transition: all 0.3s ease;
         box-shadow: 0 2px 12px rgba(201, 168, 76, 0.3);
         cursor: pointer;
-    }
-    .pricing-cta:hover {
+    }}
+    .pricing-cta:hover {{
         background: linear-gradient(135deg, #d4b55a, #b0923a);
         box-shadow: 0 4px 20px rgba(201, 168, 76, 0.5);
-    }
+    }}
 
-    /* Paywall header */
-    .paywall-header {
+    .paywall-header {{
         text-align: center;
         padding: 2rem 1rem;
         margin-top: 1rem;
-    }
-    .paywall-title {
+    }}
+    .paywall-title {{
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 1.5rem;
         font-weight: 300;
-        color: #e8e4e0;
+        color: {_pw_title};
         margin-bottom: 0.5rem;
-    }
-    .paywall-sub {
+    }}
+    .paywall-sub {{
         font-family: 'Inter', sans-serif;
         font-size: 0.85rem;
         font-weight: 300;
-        color: #7a8090;
+        color: {_pw_sub};
         margin-bottom: 2rem;
-    }
+    }}
 
-    /* Sidebar Streamlit */
-    [data-testid="stSidebar"] {
-        background: #060a14 !important;
-        border-right: 1px solid rgba(226,196,109,0.08) !important;
-    }
+    [data-testid="stSidebar"] {{
+        background: {_sidebar_bg} !important;
+        border-right: 1px solid {_sidebar_border} !important;
+    }}
     [data-testid="stSidebar"] .stMarkdown p,
-    [data-testid="stSidebar"] .stMarkdown span {
+    [data-testid="stSidebar"] .stMarkdown span {{
         font-family: 'Inter', sans-serif !important;
-        color: #9a9eb0 !important;
-    }
-    .sidebar-title {
+        color: {_sidebar_text} !important;
+    }}
+    .sidebar-title {{
         font-family: 'Cormorant Garamond', Georgia, serif;
         font-size: 1.1rem;
         font-weight: 400;
-        color: #e8e4e0;
+        color: {_stitle};
         letter-spacing: 0.02em;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(226,196,109,0.08);
-    }
-    .conv-item {
+        border-bottom: 1px solid {_stitle_border};
+    }}
+    .conv-item {{
         display: block;
         padding: 0.6rem 0.8rem;
         margin-bottom: 0.3rem;
@@ -476,54 +443,53 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
         font-size: 0.75rem;
         font-weight: 300;
-        color: #7a8090;
+        color: {_conv};
         cursor: pointer;
         transition: all 0.2s ease;
         text-decoration: none;
         border: 1px solid transparent;
-    }
-    .conv-item:hover {
+    }}
+    .conv-item:hover {{
         background: rgba(201, 168, 76, 0.06);
         border-color: rgba(201, 168, 76, 0.1);
         color: #c9a84c;
-    }
-    .conv-item.active {
+    }}
+    .conv-item.active {{
         background: rgba(201, 168, 76, 0.10);
         border-color: rgba(201, 168, 76, 0.15);
-        color: #e2c46d;
-    }
-    .conv-date {
+        color: {_conv_active};
+    }}
+    .conv-date {{
         font-size: 0.6rem;
-        color: #50546a;
+        color: {_conv_date};
         margin-top: 0.15rem;
-    }
+    }}
 
-    /* Barre utilisateur */
-    .user-bar {
+    .user-bar {{
         display: flex;
         justify-content: flex-end;
         align-items: center;
         gap: 1rem;
         padding: 0.5rem 1rem 0 1rem;
-    }
-    .user-bar .user-name {
+    }}
+    .user-bar .user-name {{
         font-family: 'Inter', sans-serif;
         font-size: 0.7rem;
         font-weight: 300;
-        color: #7a8090;
-    }
-    .user-bar a {
+        color: {_uname};
+    }}
+    .user-bar a {{
         font-family: 'Inter', sans-serif;
         font-size: 0.62rem;
         font-weight: 300;
-        color: #50546a;
+        color: {_ulink};
         text-decoration: none;
         letter-spacing: 0.04em;
         transition: color 0.2s;
-    }
-    .user-bar a:hover {
+    }}
+    .user-bar a:hover {{
         color: #c9a84c;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -662,6 +628,14 @@ if not st.session_state.user:
     </div>
     """, unsafe_allow_html=True)
 
+    # Toggle thème sur page de login
+    _lc1, _lc2, _lc3 = st.columns([4, 1, 4])
+    with _lc2:
+        _li = "☀️" if IS_DARK else "🌙"
+        if st.button(_li, key="theme_toggle_login", help="Changer de thème"):
+            st.session_state.theme = "light" if IS_DARK else "dark"
+            st.rerun()
+
     # URL d'authentification Google
     google_auth_url = (
         "https://accounts.google.com/o/oauth2/v2/auth?"
@@ -675,10 +649,13 @@ if not st.session_state.user:
     )
 
     # Carte de connexion élégante
+    _login_card_border = "rgba(226,196,109,0.12)" if IS_DARK else "rgba(139, 105, 20, 0.12)"
+    _login_card_bg = "rgba(15, 20, 34, 0.5)" if IS_DARK else "rgba(255, 255, 255, 0.6)"
+    _login_text = "#9a9eb0" if IS_DARK else "#8a8070"
     st.markdown(f"""
     <div style="text-align: center; padding: 2rem 1rem 4rem 1rem;">
-        <div style="max-width: 380px; margin: 0 auto; padding: 2.5rem 2rem; border: 1px solid rgba(226,196,109,0.12); border-radius: 20px; background: rgba(15, 20, 34, 0.5);">
-            <p style="font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; color: #9a9eb0; margin-bottom: 2rem; line-height: 1.7;">
+        <div style="max-width: 380px; margin: 0 auto; padding: 2.5rem 2rem; border: 1px solid {_login_card_border}; border-radius: 20px; background: {_login_card_bg};">
+            <p style="font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 300; color: {_login_text}; margin-bottom: 2rem; line-height: 1.7;">
                 Connecte-toi pour retrouver tes conversations<br>et avancer à ton rythme.
             </p>
             <a href="{google_auth_url}" style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.75rem 2rem; background: #ffffff; border-radius: 24px; color: #3c4043; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: box-shadow 0.2s ease;">
@@ -961,14 +938,23 @@ with st.sidebar:
             else:
                 st.warning("Écris quelque chose avant d'envoyer.")
 
+    # Toggle thème sombre/clair
+    st.markdown("---")
+    theme_label = "☀️ Mode clair" if st.session_state.theme == "dark" else "🌙 Mode sombre"
+    if st.button(theme_label, use_container_width=True, key="theme_toggle"):
+        st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
+        st.rerun()
+
     # Déconnexion en bas de sidebar
     st.markdown("---")
+    name_color = "#7a8090" if st.session_state.theme == "dark" else "#8a8070"
+    link_color = "#50546a" if st.session_state.theme == "dark" else "#b0a898"
     st.markdown(
-        f'<span style="font-size:0.7rem; color:#7a8090;">{st.session_state.user_name}</span>',
+        f'<span style="font-size:0.7rem; color:{name_color};">{st.session_state.user_name}</span>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        '<a href="?action=logout" style="font-size:0.65rem; color:#50546a; text-decoration:none;">Se déconnecter</a>',
+        f'<a href="?action=logout" style="font-size:0.65rem; color:{link_color}; text-decoration:none;">Se déconnecter</a>',
         unsafe_allow_html=True,
     )
 
@@ -994,6 +980,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# --- Toggle thème (visible sans sidebar) ---
+_toggle_col1, _toggle_col2, _toggle_col3 = st.columns([4, 1, 4])
+with _toggle_col2:
+    _theme_icon = "☀️" if IS_DARK else "🌙"
+    if st.button(_theme_icon, key="theme_toggle_main", help="Changer de thème"):
+        st.session_state.theme = "light" if IS_DARK else "dark"
+        st.rerun()
+
 # --- Affichage des messages ---
 for i, message in enumerate(st.session_state.messages):
     if i == 0 and message["role"] == "assistant":
@@ -1008,36 +1002,44 @@ for i, message in enumerate(st.session_state.messages):
 # --- Saisie utilisateur ou Paywall ---
 if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     # Paywall
-    st.markdown("""
+    _pw_line = "#e2c46d" if IS_DARK else "#B8942A"
+    st.markdown(f"""
     <div class="paywall-header">
-        <div style="width: 50px; height: 1px; background: linear-gradient(90deg, transparent, #e2c46d, transparent); margin: 0 auto 1.5rem auto;"></div>
+        <div style="width: 50px; height: 1px; background: linear-gradient(90deg, transparent, {_pw_line}, transparent); margin: 0 auto 1.5rem auto;"></div>
         <div class="paywall-title">Ce premier échange t'a parlé ?</div>
         <div class="paywall-sub">Continue à explorer ton intérieur avec un accès complet.</div>
     </div>
     """, unsafe_allow_html=True)
 
+    _pw_accent = "#e2c46d" if IS_DARK else "#8B6914"
+    _pw_card_border = "#1b1e30" if IS_DARK else "rgba(139, 105, 20, 0.12)"
+    _pw_card_bg = "rgba(15, 20, 34, 0.6)" if IS_DARK else "rgba(255, 255, 255, 0.6)"
+    _pw_price_color = "#e8e4e0" if IS_DARK else "#2a2520"
+    _pw_detail_color = "#7a8090" if IS_DARK else "#9a9080"
+    _pw_pop_border = "#c9a84c" if IS_DARK else "#8B6914"
+
     cartes_html = ""
     for nom, info in LIENS_STRIPE.items():
         est_populaire = info.get("populaire", False)
-        border_style = "border-color: #c9a84c;" if est_populaire else ""
+        border_style = f"border-color: {_pw_pop_border};" if est_populaire else ""
         badge = (
-            '<div style="font-family: Inter, sans-serif; font-size: 0.58rem; '
-            'color: #e2c46d; letter-spacing: 0.1em; text-transform: uppercase; '
-            'margin-bottom: 0.5rem;">&#10022; Le plus choisi</div>'
+            f'<div style="font-family: Inter, sans-serif; font-size: 0.58rem; '
+            f'color: {_pw_accent}; letter-spacing: 0.1em; text-transform: uppercase; '
+            f'margin-bottom: 0.5rem;">&#10022; Le plus choisi</div>'
             if est_populaire
             else ""
         )
         cartes_html += f"""
-        <div style="border: 1px solid #1b1e30; border-radius: 16px; padding: 1.5rem 1rem;
-                     text-align: center; background: rgba(15, 20, 34, 0.6); {border_style}">
+        <div style="border: 1px solid {_pw_card_border}; border-radius: 16px; padding: 1.5rem 1rem;
+                     text-align: center; background: {_pw_card_bg}; {border_style}">
             {badge}
             <div style="font-family: Cormorant Garamond, Georgia, serif; font-size: 1.2rem;
-                        color: #e2c46d; margin-bottom: 0.3rem;">{nom}</div>
+                        color: {_pw_accent}; margin-bottom: 0.3rem;">{nom}</div>
             <div style="font-family: Inter, sans-serif; font-size: 1.6rem; font-weight: 300;
-                        color: #e8e4e0; margin-bottom: 0.2rem;">
-                {info['prix']}&#8364;<span style="font-size: 0.75rem; color: #7a8090;">/mois</span>
+                        color: {_pw_price_color}; margin-bottom: 0.2rem;">
+                {info['prix']}&#8364;<span style="font-size: 0.75rem; color: {_pw_detail_color};">/mois</span>
             </div>
-            <div style="font-family: Inter, sans-serif; font-size: 0.7rem; color: #7a8090;
+            <div style="font-family: Inter, sans-serif; font-size: 0.7rem; color: {_pw_detail_color};
                         margin-bottom: 1rem;">{info['detail']}</div>
             <a href="{info['url']}" target="_blank" rel="noopener noreferrer"
                style="display: inline-block; padding: 0.6rem 2rem;
@@ -1064,10 +1066,11 @@ else:
             texte_offre = "&#10022; Dernière question gratuite"
         else:
             texte_offre = f"&#10022; {restantes} questions offertes pour découvrir Miroir Intérieur"
+        badge_color = "#c9a84c" if st.session_state.theme == "dark" else "#8B6914"
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 0.5rem;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.68rem;
-                         font-weight: 300; color: #c9a84c; letter-spacing: 0.08em;">
+                         font-weight: 300; color: {badge_color}; letter-spacing: 0.08em;">
                 {texte_offre}
             </span>
         </div>
