@@ -1087,7 +1087,7 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
 else:
     # Questions gratuites disponibles
     restantes = QUESTIONS_GRATUITES - st.session_state.nb_questions
-    if restantes > 0:
+    if restantes > 9999:
         if restantes == 1:
             texte_offre = "&#10022; Dernière question gratuite"
         else:
