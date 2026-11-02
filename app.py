@@ -523,7 +523,7 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 5
+QUESTIONS_GRATUITES = 9999
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 4
 LIMITE_SESSION = 50
@@ -571,6 +571,18 @@ if "guest_mode" not in st.session_state:
 if st.query_params.get("action") == "logout":
     for key in list(st.session_state.keys()):
         del st.session_state[key]
+    st.query_params.clear()
+    st.rerun()
+
+# --- Activation mode invité via URL ---
+if st.query_params.get("guest") == "true" and not st.session_state.user:
+    st.session_state.guest_mode = True
+    st.session_state.user = "guest"
+    st.session_state.user_name = "Visiteur"
+    st.session_state.conversation_id = None
+    st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+    st.session_state.nb_questions = 0
+    st.session_state.resume_seance = ""
     st.query_params.clear()
     st.rerun()
 
@@ -691,23 +703,34 @@ if not st.session_state.user:
     </div>
     """, unsafe_allow_html=True)
 
-    # Bouton "Essayer sans compte"
-    _guest_col1, _guest_col2, _guest_col3 = st.columns([2, 3, 2])
-    with _guest_col2:
-        if st.button("Essayer sans compte", use_container_width=True, key="guest_btn"):
-            st.session_state.guest_mode = True
-            st.session_state.user = "guest"
-            st.session_state.user_name = "Visiteur"
-            st.session_state.conversation_id = None
-            st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
-            st.session_state.nb_questions = 0
-            st.session_state.resume_seance = ""
-            st.rerun()
+    # Bouton "Essayer sans compte" — lien HTML stylé
+    _guest_border = "rgba(201, 168, 76, 0.45)" if IS_DARK else "rgba(139, 105, 20, 0.35)"
+    _guest_text = "#c9a84c" if IS_DARK else "#8B6914"
+    _guest_hover_bg = "rgba(201, 168, 76, 0.1)" if IS_DARK else "rgba(139, 105, 20, 0.07)"
+    _guest_sub = _login_text
 
     st.markdown(f"""
-    <p style="text-align: center; font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 300; color: {_login_text}; margin-top: -0.5rem; opacity: 0.7;">
-        Sans historique de conversation
-    </p>
+    <div style="text-align: center; margin: 0.8rem 0 0.3rem 0;">
+        <a href="?guest=true" style="
+            display: inline-block;
+            padding: 0.6rem 2rem;
+            border: 1.5px solid {_guest_border};
+            border-radius: 20px;
+            color: {_guest_text};
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.03em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        " onmouseover="this.style.background='{_guest_hover_bg}'; this.style.borderColor='{_guest_text}'"
+           onmouseout="this.style.background='transparent'; this.style.borderColor='{_guest_border}'">
+            ✦&ensp;Essayer sans compte
+        </a>
+        <p style="font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 300; color: {_guest_sub}; margin-top: 0.5rem; opacity: 0.8;">
+            Sans historique de conversation
+        </p>
+    </div>
     """, unsafe_allow_html=True)
 
     # Disclaimer
@@ -1189,7 +1212,7 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
 else:
     # Questions gratuites disponibles
     restantes = QUESTIONS_GRATUITES - st.session_state.nb_questions
-    if restantes > 9999:
+    if restantes > 0:
         if restantes == 1:
             texte_offre = "&#10022; Dernière question gratuite"
         else:
