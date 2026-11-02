@@ -564,6 +564,9 @@ for key in ["user", "user_id", "user_name", "access_token", "refresh_token"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
+if "guest_mode" not in st.session_state:
+    st.session_state.guest_mode = False
+
 # --- Déconnexion via URL ---
 if st.query_params.get("action") == "logout":
     for key in list(st.session_state.keys()):
@@ -688,6 +691,25 @@ if not st.session_state.user:
     </div>
     """, unsafe_allow_html=True)
 
+    # Bouton "Essayer sans compte"
+    _guest_col1, _guest_col2, _guest_col3 = st.columns([2, 3, 2])
+    with _guest_col2:
+        if st.button("Essayer sans compte", use_container_width=True, key="guest_btn"):
+            st.session_state.guest_mode = True
+            st.session_state.user = "guest"
+            st.session_state.user_name = "Visiteur"
+            st.session_state.conversation_id = None
+            st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+            st.session_state.nb_questions = 0
+            st.session_state.resume_seance = ""
+            st.rerun()
+
+    st.markdown(f"""
+    <p style="text-align: center; font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 300; color: {_login_text}; margin-top: -0.5rem; opacity: 0.7;">
+        Sans historique de conversation
+    </p>
+    """, unsafe_allow_html=True)
+
     # Disclaimer
     st.markdown("""
     <div class="disclaimer">
@@ -807,38 +829,46 @@ def generer_resume(messages, cle_api):
 # ============================================================
 
 if "conversation_id" not in st.session_state:
-    convs = charger_conversations()
-
-    if convs:
-        # Reprendre la dernière conversation
-        conv = convs[0]
-        st.session_state.conversation_id = conv["id"]
-        msgs_db = charger_messages_db(conv["id"])
-
-        if msgs_db:
-            # Reconstruire l'historique : accueil + messages sauvegardés
-            st.session_state.messages = [
-                {"role": "assistant", "content": MESSAGE_ACCUEIL}
-            ]
-            st.session_state.messages.extend(
-                [{"role": m["role"], "content": m["content"]} for m in msgs_db]
-            )
-            st.session_state.nb_questions = sum(
-                1 for m in msgs_db if m["role"] == "user"
-            )
-        else:
-            st.session_state.messages = [
-                {"role": "assistant", "content": MESSAGE_ACCUEIL}
-            ]
-            st.session_state.nb_questions = 0
-    else:
-        # Première utilisation — créer une conversation
-        conv = creer_conversation("Première conversation")
-        st.session_state.conversation_id = conv["id"] if conv else None
+    if st.session_state.guest_mode:
+        # Mode invité — pas de base de données
+        st.session_state.conversation_id = None
         st.session_state.messages = [
             {"role": "assistant", "content": MESSAGE_ACCUEIL}
         ]
         st.session_state.nb_questions = 0
+    else:
+        convs = charger_conversations()
+
+        if convs:
+            # Reprendre la dernière conversation
+            conv = convs[0]
+            st.session_state.conversation_id = conv["id"]
+            msgs_db = charger_messages_db(conv["id"])
+
+            if msgs_db:
+                # Reconstruire l'historique : accueil + messages sauvegardés
+                st.session_state.messages = [
+                    {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                ]
+                st.session_state.messages.extend(
+                    [{"role": m["role"], "content": m["content"]} for m in msgs_db]
+                )
+                st.session_state.nb_questions = sum(
+                    1 for m in msgs_db if m["role"] == "user"
+                )
+            else:
+                st.session_state.messages = [
+                    {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                ]
+                st.session_state.nb_questions = 0
+        else:
+            # Première utilisation — créer une conversation
+            conv = creer_conversation("Première conversation")
+            st.session_state.conversation_id = conv["id"] if conv else None
+            st.session_state.messages = [
+                {"role": "assistant", "content": MESSAGE_ACCUEIL}
+            ]
+            st.session_state.nb_questions = 0
 
     st.session_state.resume_seance = ""
 
@@ -853,114 +883,147 @@ if "resume_seance" not in st.session_state:
 # ============================================================
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">Tes conversations</div>', unsafe_allow_html=True)
+    if st.session_state.guest_mode:
+        # --- Sidebar simplifiée pour les invités ---
+        _guest_sidebar_text = "#c8c4be" if IS_DARK else "#5a5040"
+        _guest_sidebar_accent = "#c9a84c" if IS_DARK else "#8B6914"
+        st.markdown(f"""
+        <div style="text-align: center; padding: 1.5rem 0.5rem;">
+            <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.1rem;
+                        color: {_guest_sidebar_text}; margin-bottom: 0.8rem;">
+                Mode découverte
+            </div>
+            <div style="font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 300;
+                        color: {_guest_sidebar_text}; opacity: 0.7; line-height: 1.6;">
+                Tes échanges ne sont pas sauvegardés.<br>
+                Connecte-toi pour garder ton historique.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Bouton nouvelle conversation dans la sidebar
-    if st.button("+ Nouvelle conversation", use_container_width=True, key="sidebar_new"):
-        conv = creer_conversation()
-        if conv:
-            st.session_state.conversation_id = conv["id"]
-        st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
-        st.session_state.nb_questions = 0
-        st.session_state.resume_seance = ""
-        st.rerun()
+        _login_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=openid%20email%20profile&prompt=select_account"
+        st.markdown(f"""
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{_login_url}" style="display: inline-block; padding: 0.55rem 1.8rem;
+               background: linear-gradient(135deg, #c9a84c, #a08230);
+               border-radius: 20px; color: #0a0e1a; font-family: Inter, sans-serif;
+               font-size: 0.78rem; font-weight: 500; text-decoration: none;
+               box-shadow: 0 2px 12px rgba(201, 168, 76, 0.25);">
+                Se connecter
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("---")
+    else:
+        # --- Sidebar complète pour les utilisateurs connectés ---
+        st.markdown('<div class="sidebar-title">Tes conversations</div>', unsafe_allow_html=True)
 
-    # Charger et afficher la liste des conversations
-    conversations_list = charger_conversations()
-    for conv in conversations_list:
-        # Déterminer le titre à afficher
-        titre = conv.get("title", "Conversation")
-        if titre == "Nouvelle conversation" or titre == "Première conversation":
-            # Essayer d'utiliser la date comme titre
-            date_str = conv.get("created_at", "")
-            if date_str:
+        # Bouton nouvelle conversation dans la sidebar
+        if st.button("+ Nouvelle conversation", use_container_width=True, key="sidebar_new"):
+            conv = creer_conversation()
+            if conv:
+                st.session_state.conversation_id = conv["id"]
+            st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+            st.session_state.nb_questions = 0
+            st.session_state.resume_seance = ""
+            st.rerun()
+
+        st.markdown("---")
+
+        # Charger et afficher la liste des conversations
+        conversations_list = charger_conversations()
+        for conv in conversations_list:
+            # Déterminer le titre à afficher
+            titre = conv.get("title", "Conversation")
+            if titre == "Nouvelle conversation" or titre == "Première conversation":
+                # Essayer d'utiliser la date comme titre
+                date_str = conv.get("created_at", "")
+                if date_str:
+                    try:
+                        dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                        titre = dt.strftime("%d/%m/%Y %H:%M")
+                    except Exception:
+                        pass
+
+            # Marquer la conversation active
+            is_active = conv["id"] == st.session_state.get("conversation_id")
+            css_class = "conv-item active" if is_active else "conv-item"
+
+            # Date de dernière mise à jour
+            date_maj = ""
+            updated = conv.get("updated_at", "")
+            if updated:
                 try:
-                    dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
-                    titre = dt.strftime("%d/%m/%Y %H:%M")
+                    dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+                    date_maj = dt.strftime("%d/%m à %H:%M")
                 except Exception:
                     pass
 
-        # Marquer la conversation active
-        is_active = conv["id"] == st.session_state.get("conversation_id")
-        css_class = "conv-item active" if is_active else "conv-item"
+            # Bouton pour charger cette conversation
+            if st.button(
+                f"{'● ' if is_active else ''}{titre}",
+                key=f"conv_{conv['id']}",
+                use_container_width=True,
+            ):
+                if not is_active:
+                    st.session_state.conversation_id = conv["id"]
+                    msgs_db = charger_messages_db(conv["id"])
+                    st.session_state.messages = [
+                        {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                    ]
+                    if msgs_db:
+                        st.session_state.messages.extend(
+                            [{"role": m["role"], "content": m["content"]} for m in msgs_db]
+                        )
+                        st.session_state.nb_questions = sum(
+                            1 for m in msgs_db if m["role"] == "user"
+                        )
+                    else:
+                        st.session_state.nb_questions = 0
+                    st.session_state.resume_seance = ""
+                    st.rerun()
 
-        # Date de dernière mise à jour
-        date_maj = ""
-        updated = conv.get("updated_at", "")
-        if updated:
-            try:
-                dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
-                date_maj = dt.strftime("%d/%m à %H:%M")
-            except Exception:
-                pass
+            if date_maj and not is_active:
+                st.caption(date_maj)
 
-        # Bouton pour charger cette conversation
-        if st.button(
-            f"{'● ' if is_active else ''}{titre}",
-            key=f"conv_{conv['id']}",
-            use_container_width=True,
-        ):
-            if not is_active:
-                st.session_state.conversation_id = conv["id"]
-                msgs_db = charger_messages_db(conv["id"])
-                st.session_state.messages = [
-                    {"role": "assistant", "content": MESSAGE_ACCUEIL}
-                ]
-                if msgs_db:
-                    st.session_state.messages.extend(
-                        [{"role": m["role"], "content": m["content"]} for m in msgs_db]
-                    )
-                    st.session_state.nb_questions = sum(
-                        1 for m in msgs_db if m["role"] == "user"
-                    )
+        # Feedback
+        st.markdown("---")
+
+        if "show_feedback" not in st.session_state:
+            st.session_state.show_feedback = False
+
+        if st.button("💬 Donner ton avis", use_container_width=True, key="feedback_btn"):
+            st.session_state.show_feedback = not st.session_state.show_feedback
+
+        if st.session_state.show_feedback:
+            feedback_text = st.text_area(
+                "Ton retour nous aide à améliorer Miroir Intérieur",
+                placeholder="Ce qui t'a plu, ce qui pourrait être mieux...",
+                max_chars=1000,
+                key="feedback_input",
+                label_visibility="collapsed",
+            )
+            if st.button("Envoyer", key="feedback_send"):
+                if feedback_text and feedback_text.strip():
+                    try:
+                        requests.post(
+                            f"{SUPABASE_URL}/rest/v1/feedback",
+                            headers=_db_headers(),
+                            json={
+                                "user_id": st.session_state.user_id,
+                                "user_name": st.session_state.user_name,
+                                "content": feedback_text.strip(),
+                            },
+                            timeout=8,
+                        )
+                        st.success("Merci pour ton retour ✨")
+                        st.session_state.show_feedback = False
+                    except Exception:
+                        st.error("Erreur, réessaie plus tard.")
                 else:
-                    st.session_state.nb_questions = 0
-                st.session_state.resume_seance = ""
-                st.rerun()
+                    st.warning("Écris quelque chose avant d'envoyer.")
 
-        if date_maj and not is_active:
-            st.caption(date_maj)
-
-    # Feedback
-    st.markdown("---")
-
-    if "show_feedback" not in st.session_state:
-        st.session_state.show_feedback = False
-
-    if st.button("💬 Donner ton avis", use_container_width=True, key="feedback_btn"):
-        st.session_state.show_feedback = not st.session_state.show_feedback
-
-    if st.session_state.show_feedback:
-        feedback_text = st.text_area(
-            "Ton retour nous aide à améliorer Miroir Intérieur",
-            placeholder="Ce qui t'a plu, ce qui pourrait être mieux...",
-            max_chars=1000,
-            key="feedback_input",
-            label_visibility="collapsed",
-        )
-        if st.button("Envoyer", key="feedback_send"):
-            if feedback_text and feedback_text.strip():
-                try:
-                    requests.post(
-                        f"{SUPABASE_URL}/rest/v1/feedback",
-                        headers=_db_headers(),
-                        json={
-                            "user_id": st.session_state.user_id,
-                            "user_name": st.session_state.user_name,
-                            "content": feedback_text.strip(),
-                        },
-                        timeout=8,
-                    )
-                    st.success("Merci pour ton retour ✨")
-                    st.session_state.show_feedback = False
-                except Exception:
-                    st.error("Erreur, réessaie plus tard.")
-            else:
-                st.warning("Écris quelque chose avant d'envoyer.")
-
-    # Toggle thème sombre/clair
+    # Toggle thème sombre/clair (pour tous)
     st.markdown("---")
     theme_label = "☀️ Mode clair" if st.session_state.theme == "dark" else "🌙 Mode sombre"
     if st.button(theme_label, use_container_width=True, key="theme_toggle"):
@@ -971,14 +1034,24 @@ with st.sidebar:
     st.markdown("---")
     name_color = "#7a8090" if st.session_state.theme == "dark" else "#8a8070"
     link_color = "#50546a" if st.session_state.theme == "dark" else "#b0a898"
-    st.markdown(
-        f'<span style="font-size:0.7rem; color:{name_color};">{st.session_state.user_name}</span>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'<a href="?action=logout" style="font-size:0.65rem; color:{link_color}; text-decoration:none;">Se déconnecter</a>',
-        unsafe_allow_html=True,
-    )
+    if st.session_state.guest_mode:
+        st.markdown(
+            f'<span style="font-size:0.7rem; color:{name_color};">Visiteur</span>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<a href="?action=logout" style="font-size:0.65rem; color:{link_color}; text-decoration:none;">Quitter le mode découverte</a>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f'<span style="font-size:0.7rem; color:{name_color};">{st.session_state.user_name}</span>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<a href="?action=logout" style="font-size:0.65rem; color:{link_color}; text-decoration:none;">Se déconnecter</a>',
+            unsafe_allow_html=True,
+        )
 
 
 # ============================================================
@@ -986,12 +1059,20 @@ with st.sidebar:
 # ============================================================
 
 # --- Barre utilisateur (nom + déconnexion) ---
-st.markdown(f"""
-<div class="user-bar">
-    <span class="user-name">{st.session_state.user_name}</span>
-    <a href="?action=logout">Se déconnecter</a>
-</div>
-""", unsafe_allow_html=True)
+if st.session_state.guest_mode:
+    st.markdown(f"""
+    <div class="user-bar">
+        <span class="user-name">Mode découverte</span>
+        <a href="?action=logout">Quitter</a>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div class="user-bar">
+        <span class="user-name">{st.session_state.user_name}</span>
+        <a href="?action=logout">Se déconnecter</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- En-tête ---
 st.markdown("""
@@ -1036,6 +1117,27 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
         <div class="paywall-sub">Continue à explorer ton intérieur avec un accès complet.</div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Pour les invités : proposer de se connecter d'abord
+    if st.session_state.guest_mode:
+        _guest_pw_text = "#c8c4be" if IS_DARK else "#5a5040"
+        _login_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=openid%20email%20profile&prompt=select_account"
+        st.markdown(f"""
+        <div style="text-align: center; margin: 1rem 0 1.5rem 0;">
+            <div style="font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 300;
+                        color: {_guest_pw_text}; margin-bottom: 1rem;">
+                Crée ton compte gratuit pour sauvegarder tes conversations<br>
+                et profiter de {QUESTIONS_GRATUITES} échanges offerts.
+            </div>
+            <a href="{_login_url}" style="display: inline-block; padding: 0.6rem 2rem;
+               background: linear-gradient(135deg, #c9a84c, #a08230);
+               border-radius: 20px; color: #0a0e1a; font-family: Inter, sans-serif;
+               font-size: 0.8rem; font-weight: 500; text-decoration: none;
+               box-shadow: 0 2px 12px rgba(201, 168, 76, 0.3);">
+                Se connecter avec Google
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
     _pw_accent = "#e2c46d" if IS_DARK else "#8B6914"
     _pw_card_border = "#1b1e30" if IS_DARK else "rgba(139, 105, 20, 0.12)"
@@ -1108,8 +1210,8 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Sauvegarder en base
-        if st.session_state.conversation_id:
+        # Sauvegarder en base (sauf mode invité)
+        if not st.session_state.guest_mode and st.session_state.conversation_id:
             sauvegarder_message(st.session_state.conversation_id, "user", prompt)
 
         # Incrémenter le compteur
@@ -1148,8 +1250,8 @@ else:
                         "content": texte,
                     })
 
-                    # Sauvegarder la réponse en base
-                    if st.session_state.conversation_id:
+                    # Sauvegarder la réponse en base (sauf mode invité)
+                    if not st.session_state.guest_mode and st.session_state.conversation_id:
                         sauvegarder_message(
                             st.session_state.conversation_id, "assistant", texte
                         )
