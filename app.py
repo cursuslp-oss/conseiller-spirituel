@@ -1148,6 +1148,26 @@ with _toggle_col2:
             st.session_state.theme = "light"
             st.rerun()
 
+# --- Rappel connexion pour invités engagés ---
+if st.session_state.guest_mode and st.session_state.nb_questions >= 2:
+    _r_bg = "rgba(201, 168, 76, 0.08)" if IS_DARK else "rgba(139, 105, 20, 0.06)"
+    _r_border = "rgba(201, 168, 76, 0.25)" if IS_DARK else "rgba(139, 105, 20, 0.2)"
+    _r_text = "#c9a84c" if IS_DARK else "#8B6914"
+    _r_sub = "#9a9eb0" if IS_DARK else "#8a8070"
+    _r_login_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=openid%20email%20profile&prompt=select_account"
+    st.markdown(f"""
+    <div style="text-align: center; padding: 0.6rem 1rem; margin: 0.5rem auto 1rem auto;
+                max-width: 420px; border: 1px solid {_r_border}; border-radius: 14px;
+                background: {_r_bg};">
+        <span style="font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 300;
+                     color: {_r_sub}; line-height: 1.6;">
+            Cet échange n'est pas sauvegardé.
+            <a href="{_r_login_url}" style="color: {_r_text}; text-decoration: none; font-weight: 400;">
+                Connecte-toi</a> pour garder tes conversations.
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
+
 # --- Affichage des messages ---
 for i, message in enumerate(st.session_state.messages):
     if i == 0 and message["role"] == "assistant":
