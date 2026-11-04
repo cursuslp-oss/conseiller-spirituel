@@ -470,6 +470,24 @@ st.markdown(f"""
         border-color: rgba(201, 168, 76, 0.1);
         color: #c9a84c;
     }}
+    /* Croix suppression conversation */
+    [data-testid="stSidebar"] [data-testid="column"]:last-child button {{
+        background: none !important;
+        border: none !important;
+        padding: 0.3rem !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        color: {_conv} !important;
+        opacity: 0.3 !important;
+        font-size: 0.7rem !important;
+        transition: opacity 0.2s ease !important;
+    }}
+    [data-testid="stSidebar"] [data-testid="column"]:last-child button:hover {{
+        opacity: 0.8 !important;
+        color: #c9a84c !important;
+        background: none !important;
+        border: none !important;
+    }}
     .conv-item.active {{
         background: rgba(201, 168, 76, 0.10);
         border-color: rgba(201, 168, 76, 0.15);
