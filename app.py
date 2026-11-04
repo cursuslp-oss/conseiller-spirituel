@@ -840,6 +840,28 @@ def sauvegarder_message(conversation_id, role, content):
         pass  # Best effort — ne pas bloquer le chat si la sauvegarde échoue
 
 
+def supprimer_conversation(conversation_id):
+    """Supprime une conversation et ses messages en base."""
+    try:
+        # Supprimer les messages d'abord
+        requests.delete(
+            f"{SUPABASE_URL}/rest/v1/messages"
+            f"?conversation_id=eq.{conversation_id}",
+            headers=_db_headers(),
+            timeout=8,
+        )
+        # Puis la conversation
+        requests.delete(
+            f"{SUPABASE_URL}/rest/v1/conversations"
+            f"?id=eq.{conversation_id}",
+            headers=_db_headers(),
+            timeout=8,
+        )
+        return True
+    except Exception:
+        return False
+
+
 # --- Fonction de résumé glissant ---
 def generer_resume(messages, cle_api, resume_precedent=""):
     """Condense l'historique en notes de séance pour limiter les tokens."""
@@ -1012,28 +1034,41 @@ with st.sidebar:
                 except Exception:
                     pass
 
-            # Bouton pour charger cette conversation
-            if st.button(
-                f"{'● ' if is_active else ''}{titre}",
-                key=f"conv_{conv['id']}",
-                use_container_width=True,
-            ):
-                if not is_active:
-                    st.session_state.conversation_id = conv["id"]
-                    msgs_db = charger_messages_db(conv["id"])
-                    st.session_state.messages = [
-                        {"role": "assistant", "content": MESSAGE_ACCUEIL}
-                    ]
-                    if msgs_db:
-                        st.session_state.messages.extend(
-                            [{"role": m["role"], "content": m["content"]} for m in msgs_db]
-                        )
-                        st.session_state.nb_questions = sum(
-                            1 for m in msgs_db if m["role"] == "user"
-                        )
-                    else:
+            # Bouton conversation + croix suppression
+            col_conv, col_del = st.columns([5, 1])
+            with col_conv:
+                if st.button(
+                    f"{'● ' if is_active else ''}{titre}",
+                    key=f"conv_{conv['id']}",
+                    use_container_width=True,
+                ):
+                    if not is_active:
+                        st.session_state.conversation_id = conv["id"]
+                        msgs_db = charger_messages_db(conv["id"])
+                        st.session_state.messages = [
+                            {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                        ]
+                        if msgs_db:
+                            st.session_state.messages.extend(
+                                [{"role": m["role"], "content": m["content"]} for m in msgs_db]
+                            )
+                            st.session_state.nb_questions = sum(
+                                1 for m in msgs_db if m["role"] == "user"
+                            )
+                        else:
+                            st.session_state.nb_questions = 0
+                        st.session_state.resume_seance = ""
+                        st.rerun()
+            with col_del:
+                if st.button("✕", key=f"del_{conv['id']}", help="Supprimer"):
+                    supprimer_conversation(conv["id"])
+                    if st.session_state.get("conversation_id") == conv["id"]:
+                        # Si on supprime la conversation active, en créer une nouvelle
+                        new_conv = creer_conversation()
+                        st.session_state.conversation_id = new_conv["id"] if new_conv else None
+                        st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
                         st.session_state.nb_questions = 0
-                    st.session_state.resume_seance = ""
+                        st.session_state.resume_seance = ""
                     st.rerun()
 
             if date_maj and not is_active:
@@ -1364,9 +1399,16 @@ else:
         if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
             st.rerun()
 
-# --- Disclaimer ---
-st.markdown("""
+# --- Disclaimer + Footer ---
+_footer_text = "#6b6f80" if IS_DARK else "#a09a8e"
+st.markdown(f"""
 <div class="disclaimer">
     Espace de réflexion, pas un substitut professionnel. Urgence : 3114 (24h/24).
+</div>
+<div style="text-align: center; padding: 1.5rem 0 1rem 0; margin-top: 1rem;">
+    <span style="font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 300;
+                 color: {_footer_text}; letter-spacing: 0.05em;">
+        Miroir Intérieur · Créé par Mathieu Magnoac · © 2024 BIOCURSUS · Tous droits réservés
+    </span>
 </div>
 """, unsafe_allow_html=True)
