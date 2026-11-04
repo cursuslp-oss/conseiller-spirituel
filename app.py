@@ -163,6 +163,7 @@ st.markdown(f"""
         text-transform: uppercase;
     }}
 
+    /* --- Base chat message --- */
     .stChatMessage {{
         background-color: transparent !important;
         border: none !important;
@@ -171,6 +172,7 @@ st.markdown(f"""
         max-width: 78% !important;
     }}
 
+    /* Hide avatar column & force content to full width */
     .stChatMessage [data-testid="stChatMessageAvatarUser"],
     .stChatMessage [data-testid="stChatMessageAvatarAssistant"],
     .stChatMessage [data-testid="chatAvatarIcon-user"],
@@ -187,7 +189,15 @@ st.markdown(f"""
     .stChatMessage .stAvatar svg {{
         display: none !important;
     }}
+    /* Force message content column to fill all available width */
+    .stChatMessage > div:last-child {{
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+    }}
 
+    /* --- User bubble --- */
+    [data-testid="stChatMessage-user"],
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]),
     .stChatMessage:has(img[alt="user avatar"]) {{
@@ -199,6 +209,8 @@ st.markdown(f"""
         padding: 0.9rem 1.2rem !important;
     }}
 
+    /* --- Assistant bubble --- */
+    [data-testid="stChatMessage-assistant"],
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]),
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]),
     .stChatMessage:has(img[alt="assistant avatar"]) {{
@@ -210,6 +222,8 @@ st.markdown(f"""
         padding: 0.9rem 1.2rem !important;
     }}
 
+    /* --- User text --- */
+    [data-testid="stChatMessage-user"] p,
     .stChatMessage:has([data-testid="chatAvatarIcon-user"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarUser"]) p,
     .stChatMessage:has(img[alt="user avatar"]) p {{
@@ -219,6 +233,8 @@ st.markdown(f"""
         line-height: 1.7 !important;
     }}
 
+    /* --- Assistant text --- */
+    [data-testid="stChatMessage-assistant"] p,
     .stChatMessage:has([data-testid="chatAvatarIcon-assistant"]) p,
     .stChatMessage:has([data-testid="stChatMessageAvatarAssistant"]) p,
     .stChatMessage:has(img[alt="assistant avatar"]) p {{
@@ -523,9 +539,9 @@ REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.stre
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 9999
+QUESTIONS_GRATUITES = 5
 SEUIL_RESUME = 12
-NB_MESSAGES_RECENTS = 4
+NB_MESSAGES_RECENTS = 6
 LIMITE_SESSION = 50
 
 LIENS_STRIPE = {
@@ -825,24 +841,38 @@ def sauvegarder_message(conversation_id, role, content):
 
 
 # --- Fonction de résumé glissant ---
-def generer_resume(messages, cle_api):
+def generer_resume(messages, cle_api, resume_precedent=""):
     """Condense l'historique en notes de séance pour limiter les tokens."""
     client = anthropic.Anthropic(api_key=cle_api)
     conversation = "\n".join([
         f"{'Personne' if m['role'] == 'user' else 'Miroir'}: {m['content']}"
         for m in messages
     ])
+    contexte_prealable = ""
+    if resume_precedent:
+        contexte_prealable = (
+            "NOTES PRÉCÉDENTES (à intégrer et enrichir) :\n"
+            + resume_precedent + "\n\n"
+            "NOUVEAUX ÉCHANGES À INTÉGRER :\n"
+        )
     reponse = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=500,
+        max_tokens=800,
         system=(
-            "Résume cette conversation de réflexion intérieure en notes concises. "
-            "Capture : les thèmes explorés, les émotions exprimées, les prises de "
-            "conscience, les métaphores utilisées, les questions restées ouvertes, "
-            "et tout détail important sur la situation de la personne. "
-            "Maximum 200 mots. Sois factuel et précis."
+            "Tu rédiges des notes de séance pour un accompagnant en réflexion intérieure. "
+            "Ces notes lui permettront de poursuivre la conversation avec fluidité, "
+            "comme s'il se souvenait de tout. "
+            "Capture avec précision :\n"
+            "- Le contexte de vie de la personne (situation, âge, relations mentionnées)\n"
+            "- Les thèmes explorés et ce qui a été dit concrètement\n"
+            "- Les émotions exprimées et les mots exacts importants\n"
+            "- Les prises de conscience et tournants de la conversation\n"
+            "- Les métaphores ou images qui ont résonné\n"
+            "- Les questions restées ouvertes\n"
+            "- Où en était la conversation à la fin (dernier sujet abordé)\n"
+            "Maximum 300 mots. Sois factuel, précis et chronologique."
         ),
-        messages=[{"role": "user", "content": conversation}],
+        messages=[{"role": "user", "content": contexte_prealable + conversation}],
     )
     return reponse.content[0].text
 
@@ -1250,21 +1280,33 @@ else:
                     system_prompt = PROMPT_SYSTEME
                     if st.session_state.resume_seance:
                         system_prompt += (
-                            "\n\n## NOTES DE SÉANCE\n\n"
-                            "Voici un résumé de ce qui a été exploré précédemment "
-                            "dans cette conversation. Utilise ces notes pour assurer "
-                            "la continuité sans te répéter :\n\n"
+                            "\n\n## NOTES DE SÉANCE (contexte des échanges précédents)\n\n"
+                            "IMPORTANT : Tu es en pleine conversation avec cette personne. "
+                            "Les notes ci-dessous résument ce que vous avez déjà exploré ensemble. "
+                            "Continue naturellement le fil, ne te présente pas à nouveau, "
+                            "ne demande pas 'qu'est-ce qui t'amène', et appuie-toi sur "
+                            "ce qui a déjà été dit :\n\n"
                             + st.session_state.resume_seance
                         )
+
+                    # Envoyer seulement les messages récents à l'API (économie tokens)
+                    # mais garder tous les messages en session pour l'affichage
+                    if st.session_state.resume_seance and len(st.session_state.messages) > NB_MESSAGES_RECENTS:
+                        messages_api = [
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages[-NB_MESSAGES_RECENTS:]
+                        ]
+                    else:
+                        messages_api = [
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages
+                        ]
 
                     reponse = client.messages.create(
                         model="claude-sonnet-4-6",
                         max_tokens=1024,
                         system=system_prompt,
-                        messages=[
-                            {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state.messages
-                        ],
+                        messages=messages_api,
                     )
                     texte = reponse.content[0].text
                     st.markdown(texte)
@@ -1279,25 +1321,16 @@ else:
                             st.session_state.conversation_id, "assistant", texte
                         )
 
-                    # Résumé glissant
-                    if len(st.session_state.messages) >= SEUIL_RESUME:
+                    # Résumé glissant (ne tronque PAS l'affichage)
+                    nb_msgs = len(st.session_state.messages)
+                    if nb_msgs >= SEUIL_RESUME and (nb_msgs - 1) % 6 == 0:
                         try:
                             messages_a_resumer = st.session_state.messages[
                                 :-NB_MESSAGES_RECENTS
                             ]
-                            if st.session_state.resume_seance:
-                                messages_a_resumer.insert(0, {
-                                    "role": "assistant",
-                                    "content": (
-                                        "Résumé précédent : "
-                                        + st.session_state.resume_seance
-                                    ),
-                                })
                             st.session_state.resume_seance = generer_resume(
-                                messages_a_resumer, CLE_API
-                            )
-                            st.session_state.messages = (
-                                st.session_state.messages[-NB_MESSAGES_RECENTS:]
+                                messages_a_resumer, CLE_API,
+                                resume_precedent=st.session_state.resume_seance,
                             )
                         except Exception:
                             pass
