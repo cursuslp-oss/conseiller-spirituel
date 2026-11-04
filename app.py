@@ -471,22 +471,32 @@ st.markdown(f"""
         color: #c9a84c;
     }}
     /* Croix suppression conversation */
-    [data-testid="stSidebar"] [data-testid="column"]:last-child button {{
+    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton,
+    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button,
+    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:focus,
+    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:active {{
         background: none !important;
+        background-color: transparent !important;
         border: none !important;
-        padding: 0.3rem !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0.2rem 0.4rem !important;
         margin: 0 !important;
         min-height: 0 !important;
+        height: auto !important;
         color: {_conv} !important;
-        opacity: 0.3 !important;
-        font-size: 0.7rem !important;
+        opacity: 0.35 !important;
+        font-size: 0.75rem !important;
+        line-height: 1 !important;
         transition: opacity 0.2s ease !important;
     }}
-    [data-testid="stSidebar"] [data-testid="column"]:last-child button:hover {{
-        opacity: 0.8 !important;
+    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:hover {{
+        opacity: 0.9 !important;
         color: #c9a84c !important;
         background: none !important;
+        background-color: transparent !important;
         border: none !important;
+        box-shadow: none !important;
     }}
     .conv-item.active {{
         background: rgba(201, 168, 76, 0.10);
