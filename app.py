@@ -470,33 +470,35 @@ st.markdown(f"""
         border-color: rgba(201, 168, 76, 0.1);
         color: #c9a84c;
     }}
-    /* Croix suppression conversation */
-    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton,
-    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button,
-    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:focus,
-    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:active {{
-        background: none !important;
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-        padding: 0.2rem 0.4rem !important;
+    /* Croix suppression conversation (lien HTML pur, pas de st.button) */
+    .delete-conv-wrapper {{
+        height: 0 !important;
+        overflow: visible !important;
         margin: 0 !important;
-        min-height: 0 !important;
-        height: auto !important;
-        color: {_conv} !important;
-        opacity: 0.35 !important;
-        font-size: 0.75rem !important;
-        line-height: 1 !important;
-        transition: opacity 0.2s ease !important;
+        padding: 0 !important;
     }}
-    [data-testid="stSidebar"] [data-testid="column"]:last-child .stButton > button:hover {{
-        opacity: 0.9 !important;
-        color: #c9a84c !important;
-        background: none !important;
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
+    .delete-conv-link {{
+        display: block;
+        text-align: right;
+        position: relative;
+        top: -2.2rem;
+        right: 0.3rem;
+        z-index: 20;
+        color: {_conv};
+        opacity: 0.3;
+        font-size: 0.65rem;
+        text-decoration: none !important;
+        transition: opacity 0.2s ease, color 0.2s ease;
+        cursor: pointer;
+        pointer-events: auto;
+        width: fit-content;
+        margin-left: auto;
+    }}
+    .delete-conv-link:hover,
+    .delete-conv-link:focus {{
+        opacity: 1;
+        color: #c9a84c;
+        text-decoration: none !important;
     }}
     .conv-item.active {{
         background: rgba(201, 168, 76, 0.10);
@@ -890,6 +892,89 @@ def supprimer_conversation(conversation_id):
         return False
 
 
+# --- Profil utilisateur persistant ---
+
+def charger_profil_utilisateur():
+    """Charge le profil persistant de l'utilisateur depuis Supabase."""
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/user_profiles"
+            f"?user_id=eq.{st.session_state.user_id}"
+            f"&limit=1",
+            headers=_db_headers(),
+            timeout=8,
+        )
+        data = r.json()
+        if r.ok and data:
+            return data[0].get("profile_data", "")
+        return ""
+    except Exception:
+        return ""
+
+
+def sauvegarder_profil_utilisateur(profile_data):
+    """Sauvegarde (upsert) le profil persistant de l'utilisateur."""
+    try:
+        headers = _db_headers()
+        headers["Prefer"] = "return=representation,resolution=merge-duplicates"
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/user_profiles",
+            headers=headers,
+            json={
+                "user_id": st.session_state.user_id,
+                "profile_data": profile_data,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
+def extraire_insights_profil(messages, cle_api, profil_existant=""):
+    """Extrait les éléments durables d'une conversation pour enrichir le profil."""
+    client = anthropic.Anthropic(api_key=cle_api)
+    conversation = "\n".join([
+        f"{'Personne' if m['role'] == 'user' else 'Miroir'}: {m['content']}"
+        for m in messages
+    ])
+    contexte = ""
+    if profil_existant:
+        contexte = (
+            "PROFIL EXISTANT (à enrichir, mettre à jour, jamais supprimer sans raison) :\n"
+            + profil_existant + "\n\n"
+            "NOUVELLE CONVERSATION À ANALYSER :\n"
+        )
+    reponse = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=600,
+        system=(
+            "Tu es un analyste qui extrait les éléments durables d'une conversation "
+            "d'accompagnement intérieur pour construire un profil persistant de la personne. "
+            "Ce profil sera relu par l'accompagnant IA au début de chaque future conversation.\n\n"
+            "Extrait et structure les éléments suivants :\n"
+            "## SCHÉMAS IDENTIFIÉS\n"
+            "Les patterns de fonctionnement récurrents (ex: fuit l'inconfort, intellectualise au lieu de sentir)\n\n"
+            "## CROYANCES LIMITANTES\n"
+            "Ce que la personne croit sur elle-même ou le monde et qui la bloque (ex: 'je dois être utile pour exister')\n\n"
+            "## PRISES DE CONSCIENCE\n"
+            "Les moments où quelque chose a vraiment bougé, avec les mots exacts si possible\n\n"
+            "## CE QUI LA TOUCHE\n"
+            "Ce qui provoque une émotion, un frisson, des larmes, un silence significatif\n\n"
+            "## CONTRADICTIONS\n"
+            "Quand la personne dit une chose mais fait/montre le contraire\n\n"
+            "## CONTEXTE DE VIE\n"
+            "Situation, relations, métier, âge, éléments factuels durables\n\n"
+            "Si un profil existant est fourni, enrichis-le sans supprimer ce qui est déjà pertinent. "
+            "Mets à jour les éléments qui ont évolué. "
+            "Sois concis mais précis. Utilise les mots exacts de la personne quand c'est parlant. "
+            "Maximum 400 mots."
+        ),
+        messages=[{"role": "user", "content": contexte + conversation}],
+    )
+    return reponse.content[0].text
+
+
 # --- Fonction de résumé glissant ---
 def generer_resume(messages, cle_api, resume_precedent=""):
     """Condense l'historique en notes de séance pour limiter les tokens."""
@@ -925,6 +1010,23 @@ def generer_resume(messages, cle_api, resume_precedent=""):
         messages=[{"role": "user", "content": contexte_prealable + conversation}],
     )
     return reponse.content[0].text
+
+
+# ============================================================
+# SUPPRESSION DE CONVERSATION (via query param)
+# ============================================================
+
+_del_id = st.query_params.get("delete_conv")
+if _del_id and not st.session_state.guest_mode:
+    supprimer_conversation(_del_id)
+    if st.session_state.get("conversation_id") == _del_id:
+        new_conv = creer_conversation()
+        st.session_state.conversation_id = new_conv["id"] if new_conv else None
+        st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+        st.session_state.nb_questions = 0
+        st.session_state.resume_seance = ""
+    st.query_params.clear()
+    st.rerun()
 
 
 # ============================================================
@@ -979,6 +1081,11 @@ if "nb_questions" not in st.session_state:
     st.session_state.nb_questions = 0
 if "resume_seance" not in st.session_state:
     st.session_state.resume_seance = ""
+if "profil_utilisateur" not in st.session_state:
+    if not st.session_state.guest_mode and st.session_state.get("user_id"):
+        st.session_state.profil_utilisateur = charger_profil_utilisateur()
+    else:
+        st.session_state.profil_utilisateur = ""
 
 
 # ============================================================
@@ -1063,41 +1170,35 @@ with st.sidebar:
                     pass
 
             # Bouton conversation + croix suppression
-            col_conv, col_del = st.columns([5, 1])
-            with col_conv:
-                if st.button(
-                    f"{'● ' if is_active else ''}{titre}",
-                    key=f"conv_{conv['id']}",
-                    use_container_width=True,
-                ):
-                    if not is_active:
-                        st.session_state.conversation_id = conv["id"]
-                        msgs_db = charger_messages_db(conv["id"])
-                        st.session_state.messages = [
-                            {"role": "assistant", "content": MESSAGE_ACCUEIL}
-                        ]
-                        if msgs_db:
-                            st.session_state.messages.extend(
-                                [{"role": m["role"], "content": m["content"]} for m in msgs_db]
-                            )
-                            st.session_state.nb_questions = sum(
-                                1 for m in msgs_db if m["role"] == "user"
-                            )
-                        else:
-                            st.session_state.nb_questions = 0
-                        st.session_state.resume_seance = ""
-                        st.rerun()
-            with col_del:
-                if st.button("✕", key=f"del_{conv['id']}", help="Supprimer"):
-                    supprimer_conversation(conv["id"])
-                    if st.session_state.get("conversation_id") == conv["id"]:
-                        # Si on supprime la conversation active, en créer une nouvelle
-                        new_conv = creer_conversation()
-                        st.session_state.conversation_id = new_conv["id"] if new_conv else None
-                        st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+            if st.button(
+                f"{'● ' if is_active else ''}{titre}",
+                key=f"conv_{conv['id']}",
+                use_container_width=True,
+            ):
+                if not is_active:
+                    st.session_state.conversation_id = conv["id"]
+                    msgs_db = charger_messages_db(conv["id"])
+                    st.session_state.messages = [
+                        {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                    ]
+                    if msgs_db:
+                        st.session_state.messages.extend(
+                            [{"role": m["role"], "content": m["content"]} for m in msgs_db]
+                        )
+                        st.session_state.nb_questions = sum(
+                            1 for m in msgs_db if m["role"] == "user"
+                        )
+                    else:
                         st.session_state.nb_questions = 0
-                        st.session_state.resume_seance = ""
+                    st.session_state.resume_seance = ""
                     st.rerun()
+            # Croix suppression en pur HTML (pas de st.button)
+            st.markdown(
+                f'<div class="delete-conv-wrapper">'
+                f'<a href="?delete_conv={conv["id"]}" class="delete-conv-link" title="Supprimer">✕</a>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
             if date_maj and not is_active:
                 st.caption(date_maj)
@@ -1359,8 +1460,21 @@ else:
                 try:
                     client = anthropic.Anthropic(api_key=CLE_API)
 
-                    # Construire le prompt système avec notes de séance
+                    # Construire le prompt système avec profil + notes de séance
                     system_prompt = PROMPT_SYSTEME
+
+                    # Injecter le profil persistant (connaissance durable de la personne)
+                    if st.session_state.get("profil_utilisateur"):
+                        system_prompt += (
+                            "\n\n## PROFIL DE LA PERSONNE (construit au fil des conversations)\n\n"
+                            "Tu connais cette personne. Voici ce que tu as appris d'elle "
+                            "au fil de vos échanges. Appuie-toi sur ces éléments pour aller "
+                            "plus en profondeur, pointer les récurrences, et ne pas repartir "
+                            "de zéro. Ne récite jamais ce profil. Utilise-le comme un thérapeute "
+                            "utilise ses notes : en silence, pour guider ta justesse.\n\n"
+                            + st.session_state.profil_utilisateur
+                        )
+
                     if st.session_state.resume_seance:
                         system_prompt += (
                             "\n\n## NOTES DE SÉANCE (contexte des échanges précédents)\n\n"
@@ -1415,6 +1529,23 @@ else:
                                 messages_a_resumer, CLE_API,
                                 resume_precedent=st.session_state.resume_seance,
                             )
+                        except Exception:
+                            pass
+
+                    # Mise à jour du profil persistant (toutes les 10 questions, utilisateur connecté)
+                    if (
+                        not st.session_state.guest_mode
+                        and st.session_state.get("user_id")
+                        and st.session_state.nb_questions > 0
+                        and st.session_state.nb_questions % 10 == 0
+                    ):
+                        try:
+                            nouveau_profil = extraire_insights_profil(
+                                st.session_state.messages, CLE_API,
+                                profil_existant=st.session_state.get("profil_utilisateur", ""),
+                            )
+                            st.session_state.profil_utilisateur = nouveau_profil
+                            sauvegarder_profil_utilisateur(nouveau_profil)
                         except Exception:
                             pass
 
