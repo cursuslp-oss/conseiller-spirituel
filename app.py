@@ -946,7 +946,7 @@ def extraire_insights_profil(messages, cle_api, profil_existant=""):
             "NOUVELLE CONVERSATION À ANALYSER :\n"
         )
     reponse = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5-5",
         max_tokens=600,
         system=(
             "Tu es un analyste qui extrait les éléments durables d'une conversation "
@@ -991,7 +991,7 @@ def generer_resume(messages, cle_api, resume_precedent=""):
             "NOUVEAUX ÉCHANGES À INTÉGRER :\n"
         )
     reponse = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5-5",
         max_tokens=800,
         system=(
             "Tu rédiges des notes de séance pour un accompagnant en réflexion intérieure. "
@@ -1500,7 +1500,7 @@ else:
                         ]
 
                     reponse = client.messages.create(
-                        model="claude-sonnet-4-6",
+                        model="claude-sonnet-5-5",
                         max_tokens=1024,
                         system=system_prompt,
                         messages=messages_api,
