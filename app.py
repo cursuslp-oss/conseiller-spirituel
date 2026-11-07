@@ -972,7 +972,7 @@ def extraire_insights_profil(messages, cle_api, profil_existant=""):
         ),
         messages=[{"role": "user", "content": contexte + conversation}],
     )
-    return reponse.content[0].text
+    return next(block.text for block in reponse.content if block.type == "text")
 
 
 # --- Fonction de résumé glissant ---
@@ -1009,7 +1009,7 @@ def generer_resume(messages, cle_api, resume_precedent=""):
         ),
         messages=[{"role": "user", "content": contexte_prealable + conversation}],
     )
-    return reponse.content[0].text
+    return next(block.text for block in reponse.content if block.type == "text")
 
 
 # ============================================================
@@ -1505,7 +1505,7 @@ else:
                         system=system_prompt,
                         messages=messages_api,
                     )
-                    texte = reponse.content[0].text
+                    texte = next(block.text for block in reponse.content if block.type == "text")
                     st.markdown(texte)
                     st.session_state.messages.append({
                         "role": "assistant",
