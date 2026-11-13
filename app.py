@@ -603,6 +603,7 @@ MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout c
 
 # --- Constantes ---
 QUESTIONS_GRATUITES = 10
+QUESTIONS_GRATUITES_INVITE = 4
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 6
 LIMITE_SESSION = 50
@@ -1400,7 +1401,8 @@ for i, message in enumerate(st.session_state.messages):
             st.markdown(message["content"])
 
 # --- Saisie utilisateur ou Paywall ---
-if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
+_limite_gratuite = QUESTIONS_GRATUITES_INVITE if st.session_state.guest_mode else QUESTIONS_GRATUITES
+if st.session_state.nb_questions >= _limite_gratuite:
     # Paywall
     _pw_line = "#e2c46d" if IS_DARK else "#B8942A"
     st.markdown(f"""
@@ -1481,7 +1483,7 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
 
 else:
     # Questions gratuites disponibles
-    restantes = QUESTIONS_GRATUITES - st.session_state.nb_questions
+    restantes = _limite_gratuite - st.session_state.nb_questions
     if restantes > 0:
         if restantes == 1:
             texte_offre = "&#10022; Dernière question gratuite"
@@ -1611,7 +1613,7 @@ else:
                     st.error(f"Erreur : {e}")
 
         # Si c'était la dernière question gratuite, rerun pour afficher le paywall
-        if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
+        if st.session_state.nb_questions >= _limite_gratuite:
             st.rerun()
 
 # --- Disclaimer + Footer ---
