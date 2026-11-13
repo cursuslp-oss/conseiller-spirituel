@@ -162,6 +162,11 @@ st.markdown(f"""
         display: block !important;
         z-index: 999992 !important;
     }}
+    /* Hide Streamlit Cloud toolbar buttons (Share, favorite, edit, main menu) */
+    [data-testid="stBaseButton-header"],
+    [data-testid="stMainMenuButton"] {{
+        display: none !important;
+    }}
 
     .header-container {{
         text-align: center;
