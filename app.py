@@ -835,6 +835,35 @@ def _db_headers():
     }
 
 
+def compter_questions_totales():
+    """Compte le nombre total de messages 'user' sur TOUTES les conversations de l'utilisateur."""
+    try:
+        convs = charger_conversations()
+        if not convs:
+            return 0
+        conv_ids = [c["id"] for c in convs]
+        total = 0
+        for cid in conv_ids:
+            r = requests.get(
+                f"{SUPABASE_URL}/rest/v1/messages"
+                f"?conversation_id=eq.{cid}&role=eq.user&select=id",
+                headers={**_db_headers(), "Prefer": "count=exact"},
+                timeout=8,
+            )
+            count_header = r.headers.get("content-range", "")
+            if "/" in count_header:
+                c = count_header.split("/")[-1]
+                if c != "*":
+                    total += int(c)
+                else:
+                    total += len(r.json()) if r.ok else 0
+            elif r.ok:
+                total += len(r.json())
+        return total
+    except Exception:
+        return 0
+
+
 def charger_conversations():
     """Charge la liste des conversations de l'utilisateur (les plus récentes d'abord)."""
     try:
@@ -1056,7 +1085,7 @@ if _del_id and not st.session_state.guest_mode:
         new_conv = creer_conversation()
         st.session_state.conversation_id = new_conv["id"] if new_conv else None
         st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
-        st.session_state.nb_questions = 0
+        st.session_state.nb_questions = compter_questions_totales()
         st.session_state.resume_seance = ""
     st.query_params.clear()
     st.rerun()
@@ -1077,6 +1106,9 @@ if "conversation_id" not in st.session_state:
     else:
         convs = charger_conversations()
 
+        # Compter le total de questions sur TOUTES les conversations
+        st.session_state.nb_questions = compter_questions_totales()
+
         if convs:
             # Reprendre la dernière conversation
             conv = convs[0]
@@ -1091,14 +1123,10 @@ if "conversation_id" not in st.session_state:
                 st.session_state.messages.extend(
                     [{"role": m["role"], "content": m["content"]} for m in msgs_db]
                 )
-                st.session_state.nb_questions = sum(
-                    1 for m in msgs_db if m["role"] == "user"
-                )
             else:
                 st.session_state.messages = [
                     {"role": "assistant", "content": MESSAGE_ACCUEIL}
                 ]
-                st.session_state.nb_questions = 0
         else:
             # Première utilisation — créer une conversation
             conv = creer_conversation("Première conversation")
@@ -1106,7 +1134,6 @@ if "conversation_id" not in st.session_state:
             st.session_state.messages = [
                 {"role": "assistant", "content": MESSAGE_ACCUEIL}
             ]
-            st.session_state.nb_questions = 0
 
     st.session_state.resume_seance = ""
 
@@ -1167,7 +1194,7 @@ with st.sidebar:
             if conv:
                 st.session_state.conversation_id = conv["id"]
             st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
-            st.session_state.nb_questions = 0
+            st.session_state.nb_questions = compter_questions_totales()
             st.session_state.resume_seance = ""
             st.rerun()
 
@@ -1218,11 +1245,7 @@ with st.sidebar:
                         st.session_state.messages.extend(
                             [{"role": m["role"], "content": m["content"]} for m in msgs_db]
                         )
-                        st.session_state.nb_questions = sum(
-                            1 for m in msgs_db if m["role"] == "user"
-                        )
-                    else:
-                        st.session_state.nb_questions = 0
+                    st.session_state.nb_questions = compter_questions_totales()
                     st.session_state.resume_seance = ""
                     st.rerun()
             # Croix suppression en pur HTML (pas de st.button)
