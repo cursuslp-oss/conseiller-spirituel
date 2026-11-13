@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 # --- Configuration de la page ---
 st.set_page_config(
-    page_title="Miroir Intérieur",
+    page_title="face à soi",
     page_icon="🪞",
     layout="centered",
     initial_sidebar_state="auto"
@@ -701,7 +701,7 @@ if not st.session_state.user:
     # En-tête
     st.markdown("""
     <div class="header-container">
-        <div class="header-title">Miroir Intérieur</div>
+        <div class="header-title">face à soi</div>
         <div class="header-line"></div>
         <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
     </div>
@@ -1214,7 +1214,7 @@ with st.sidebar:
 
         if st.session_state.show_feedback:
             feedback_text = st.text_area(
-                "Ton retour nous aide à améliorer Miroir Intérieur",
+                "Ton retour nous aide à améliorer face à soi",
                 placeholder="Ce qui t'a plu, ce qui pourrait être mieux...",
                 max_chars=1000,
                 key="feedback_input",
@@ -1294,7 +1294,7 @@ else:
 # --- En-tête ---
 st.markdown("""
 <div class="header-container">
-    <div class="header-title">Miroir Intérieur</div>
+    <div class="header-title">face à soi</div>
     <div class="header-line"></div>
     <div class="header-sub">Un espace pour voir ce que tu ne regardes pas encore</div>
 </div>
@@ -1430,7 +1430,7 @@ else:
         if restantes == 1:
             texte_offre = "&#10022; Dernière question gratuite"
         else:
-            texte_offre = f"&#10022; {restantes} questions offertes pour découvrir Miroir Intérieur"
+            texte_offre = f"&#10022; {restantes} questions offertes pour découvrir face à soi"
         badge_color = "#c9a84c" if st.session_state.theme == "dark" else "#8B6914"
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 0.5rem;">
@@ -1567,7 +1567,7 @@ st.markdown(f"""
 <div style="text-align: center; padding: 1.5rem 0 1rem 0; margin-top: 1rem;">
     <span style="font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 300;
                  color: {_footer_text}; letter-spacing: 0.05em;">
-        Miroir Intérieur · Créé par Mathieu Magnoac · © 2024 BIOCURSUS · Tous droits réservés
+        face à soi · Créé par Mathieu Magnoac · © 2024 BIOCURSUS · Tous droits réservés
     </span>
 </div>
 """, unsafe_allow_html=True)
