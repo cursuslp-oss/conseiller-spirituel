@@ -133,7 +133,7 @@ st.markdown(f"""
 
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
-    header {{visibility: hidden;}}
+    header [data-testid="stToolbar"] {{visibility: hidden;}}
 
     .header-container {{
         text-align: center;
