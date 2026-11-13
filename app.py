@@ -131,10 +131,8 @@ st.markdown(f"""
         color: {_text} !important;
     }}
 
-    #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
-    header [data-testid="stToolbar"] {{display: none;}}
-    [data-testid="collapsedControl"] {{display: block !important; visibility: visible !important;}}
+    [data-testid="stDecoration"] {{display: none;}}
 
     .header-container {{
         text-align: center;
