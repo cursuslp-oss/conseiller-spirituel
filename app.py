@@ -1454,7 +1454,7 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     </div>
     </body></html>
     """
-    st.html(html_complet, height=320)
+    st.html(html_complet)
 
 else:
     # Questions gratuites disponibles
