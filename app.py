@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="Face à Soi",
     page_icon="🪞",
     layout="centered",
-    initial_sidebar_state="auto"
+    initial_sidebar_state="expanded"
 )
 
 # --- Import Google Fonts ---
@@ -133,8 +133,35 @@ st.markdown(f"""
 
     footer {{visibility: hidden;}}
     [data-testid="stDecoration"] {{display: none;}}
-    .stDeployButton {{display: none !important;}}
+    .stAppDeployButton, .stDeployButton {{display: none !important;}}
+    [data-testid="stAppDeployButton"] {{display: none !important;}}
     [data-testid="stStatusWidget"] {{display: none !important;}}
+
+    /* === FORCE sidebar toggle buttons visible === */
+    [data-testid="stHeader"] {{
+        z-index: 999991 !important;
+        visibility: visible !important;
+    }}
+    [data-testid="stToolbar"] {{
+        visibility: visible !important;
+        display: flex !important;
+    }}
+    [data-testid="stExpandSidebarButton"] {{
+        visibility: visible !important;
+        display: inline-flex !important;
+        z-index: 999992 !important;
+        opacity: 1 !important;
+    }}
+    [data-testid="stSidebarCollapseButton"] {{
+        visibility: visible !important;
+        display: block !important;
+    }}
+    /* Fallback for older Streamlit versions */
+    [data-testid="collapsedControl"] {{
+        visibility: visible !important;
+        display: block !important;
+        z-index: 999992 !important;
+    }}
 
     .header-container {{
         text-align: center;
@@ -1422,7 +1449,7 @@ if st.session_state.nb_questions >= QUESTIONS_GRATUITES:
     </div>
     </body></html>
     """
-    st.components.v1.html(html_complet, height=320)
+    st.html(html_complet, height=320)
 
 else:
     # Questions gratuites disponibles
