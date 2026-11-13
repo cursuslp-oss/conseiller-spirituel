@@ -609,20 +609,20 @@ LIMITE_SESSION = 50
 
 LIENS_STRIPE = {
     "Découverte": {
-        "prix": "4,90",
-        "detail": "5 échanges / jour",
-        "url": "https://buy.stripe.com/dRm4gA1sP05Bh0F3SAbMQ0R"
+        "prix": "6,90",
+        "detail": "10 échanges / jour",
+        "url": "https://buy.stripe.com/3cIaEYfjFf0v25Lcp6bMQ11"
     },
     "Essentiel": {
-        "prix": "9,90",
-        "detail": "20 échanges / jour",
-        "url": "https://buy.stripe.com/8x2cN63AXf0v1lH0GobMQ0S",
+        "prix": "14,90",
+        "detail": "25 échanges / jour",
+        "url": "https://buy.stripe.com/6oUdRac7t8C7aCh0GobMQ12",
         "populaire": True
     },
     "Illimité": {
-        "prix": "19,90",
+        "prix": "34,90",
         "detail": "Sans aucune limite",
-        "url": "https://buy.stripe.com/14AaEYefB9GbaCh20wbMQ0T"
+        "url": "https://buy.stripe.com/00wdRac7tcSn7q588QbMQ13"
     }
 }
 
