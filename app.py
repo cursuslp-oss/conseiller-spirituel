@@ -569,7 +569,7 @@ REDIRECT_URI = "https://face-a-soi.streamlit.app"
 MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
 
 # --- Constantes ---
-QUESTIONS_GRATUITES = 150
+QUESTIONS_GRATUITES = 10
 SEUIL_RESUME = 12
 NB_MESSAGES_RECENTS = 6
 LIMITE_SESSION = 50
