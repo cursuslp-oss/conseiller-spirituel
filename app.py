@@ -133,6 +133,16 @@ st.markdown(f"""
 
     footer {{visibility: hidden;}}
     [data-testid="stDecoration"] {{display: none;}}
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+    [data-testid="stToolbar"] {{
+        display: none !important;
+    }}
+    button[data-testid="stExpandSidebarButton"] {{
+        display: inline-flex !important;
+        visibility: visible !important;
+    }}
 
     .header-container {{
         text-align: center;
