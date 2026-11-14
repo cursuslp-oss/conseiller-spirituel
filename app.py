@@ -599,7 +599,18 @@ GOOGLE_CLIENT_ID = st.secrets["GOOGLE_CLIENT_ID"]
 GOOGLE_CLIENT_SECRET = st.secrets["GOOGLE_CLIENT_SECRET"]
 REDIRECT_URI = st.secrets.get("REDIRECT_URI", "https://conseiller-spirituel.streamlit.app")
 
-MESSAGE_ACCUEIL = "Juste un espace pour regarder en toi avec honnêteté. Tout ce que tu vis à l'extérieur te parle de ce que tu portes à l'intérieur.<br><br>Si tu es prêt(e) à regarder, on y va."
+MESSAGE_ACCUEIL_PREMIER = (
+    "Bienvenue dans Face à Soi.<br><br>"
+    "Ici, pas de conseils tout faits ni de positivité de surface. "
+    "C'est un espace pour regarder honnêtement ce que tu vis, "
+    "comprendre ce qui se joue en toi, et surtout le traverser.<br><br>"
+    "Tu peux parler de tout : une relation qui te pèse, un schéma que tu reproduis, "
+    "une émotion que tu n'arrives pas à nommer, une décision que tu tournes dans ta tête, "
+    "ou juste un truc qui coince sans que tu saches quoi.<br><br>"
+    "Tout ce qui se dit ici reste ici. Il n'y a rien à bien faire, rien à savoir avant de commencer.<br><br>"
+    "Qu'est-ce qui t'amène ?"
+)
+MESSAGE_ACCUEIL = "Content de te retrouver. Qu'est-ce qui t'amène aujourd'hui ?"
 
 # --- Constantes ---
 QUESTIONS_GRATUITES = 10
@@ -660,7 +671,7 @@ if st.query_params.get("guest") == "true" and not st.session_state.user:
     st.session_state.user = "guest"
     st.session_state.user_name = "Visiteur"
     st.session_state.conversation_id = None
-    st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL}]
+    st.session_state.messages = [{"role": "assistant", "content": MESSAGE_ACCUEIL_PREMIER}]
     st.session_state.nb_questions = 0
     st.session_state.resume_seance = ""
     st.query_params.clear()
@@ -1098,10 +1109,10 @@ if _del_id and not st.session_state.guest_mode:
 
 if "conversation_id" not in st.session_state:
     if st.session_state.guest_mode:
-        # Mode invité — pas de base de données
+        # Mode invité — toujours le message de première visite
         st.session_state.conversation_id = None
         st.session_state.messages = [
-            {"role": "assistant", "content": MESSAGE_ACCUEIL}
+            {"role": "assistant", "content": MESSAGE_ACCUEIL_PREMIER}
         ]
         st.session_state.nb_questions = 0
     else:
@@ -1117,7 +1128,7 @@ if "conversation_id" not in st.session_state:
             msgs_db = charger_messages_db(conv["id"])
 
             if msgs_db:
-                # Reconstruire l'historique : accueil + messages sauvegardés
+                # Reconstruire l'historique : message retour + messages sauvegardés
                 st.session_state.messages = [
                     {"role": "assistant", "content": MESSAGE_ACCUEIL}
                 ]
@@ -1125,15 +1136,17 @@ if "conversation_id" not in st.session_state:
                     [{"role": m["role"], "content": m["content"]} for m in msgs_db]
                 )
             else:
+                # Conversation vide — vérifier si c'est un nouvel utilisateur
+                _a_deja_echange = st.session_state.nb_questions > 0
                 st.session_state.messages = [
-                    {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                    {"role": "assistant", "content": MESSAGE_ACCUEIL if _a_deja_echange else MESSAGE_ACCUEIL_PREMIER}
                 ]
         else:
             # Première utilisation — créer une conversation
             conv = creer_conversation("Première conversation")
             st.session_state.conversation_id = conv["id"] if conv else None
             st.session_state.messages = [
-                {"role": "assistant", "content": MESSAGE_ACCUEIL}
+                {"role": "assistant", "content": MESSAGE_ACCUEIL_PREMIER}
             ]
 
     st.session_state.resume_seance = ""
